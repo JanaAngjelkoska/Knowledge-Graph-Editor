@@ -1,4 +1,4 @@
-package com.kgt.kgddl;
+package com.knowledgegrapheditor;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

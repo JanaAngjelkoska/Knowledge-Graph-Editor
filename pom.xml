@@ -8,11 +8,11 @@
         <version>3.4.4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.kgt</groupId>
-    <artifactId>KGDDL</artifactId>
+    <groupId>com.knowledgegrapheditor</groupId>
+    <artifactId>kge</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>KGDDL</name>
-    <description>KGDDL</description>
+    <name>KnowledgeGraphEditor</name>
+    <description></description>
     <url/>
     <licenses>
         <license/>
