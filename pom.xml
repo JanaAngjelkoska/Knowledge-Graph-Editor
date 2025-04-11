@@ -12,7 +12,7 @@
     <artifactId>kge</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>KnowledgeGraphEditor</name>
-    <description></description>
+    <description>A tool for editing and visualising, maintaining knowledge graph data.</description>
     <url/>
     <licenses>
         <license/>
