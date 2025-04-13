@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public interface RelationshipRepository {
+public interface ArbitraryRelationshipRepository {
 
     List<Record> findAll();
     Record findById(UUID id);

@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Golos+Text&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+body, html {
+    overflow-x: hidden;
+    width: 100%;
+!important
+}
+
+.givefont {
+    font-family: "Montserrat", sans-serif;
+    font-optical-sizing: auto;
+    text-decoration: none;
+    font-style: normal;
+}
+
+.givegradient {
+    background: linear-gradient(to right, rgba(0, 255, 255, 0.05), rgba(0, 0, 255, 0.05));
+    transition: background 0.3s ease; /* Smooth transition for the background */
+}
+
+.givegradient:hover {
+    background: linear-gradient(to right, rgba(0, 255, 255, 0.1), rgba(0, 0, 255, 0.1));
+}
+
+.addbg {
+    background-image: url("../img/land.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position-x: 750px;
+    height: 700px;
+}
+
+.custom-bg-col {
+    background: #F9FBFD;
+}

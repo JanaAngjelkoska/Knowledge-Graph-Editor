@@ -72,8 +72,12 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.neo4j.driver</groupId>
+            <artifactId>neo4j-java-driver</artifactId>
+            <version>5.14.0</version>
+        </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>
