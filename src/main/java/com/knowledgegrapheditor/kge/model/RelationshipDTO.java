@@ -1,14 +1,13 @@
 package com.knowledgegrapheditor.kge.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class RelationshipDTO {
 
     String startNodeId;
@@ -21,6 +20,34 @@ public class RelationshipDTO {
         this.startNodeId = startNodeId;
         this.endNodeId = endNodeId;
         this.relationshipType = relationshipType;
+    }
+
+    public RelationshipDTO(){}
+
+
+    public RelationshipDTO(String startNodeId, String endNodeId, Map<String, Object> properties, String relationshipType) {
+        this.startNodeId = startNodeId;
+        this.endNodeId = endNodeId;
+        this.properties = properties;
+        this.relationshipType = relationshipType;
+    }
+
+
+
+    public String getStartNodeId() {
+        return startNodeId;
+    }
+
+    public String getEndNodeId() {
+        return endNodeId;
+    }
+
+    public Map<String, Object> getProperties() {
+        return properties;
+    }
+
+    public String getRelationshipType() {
+        return relationshipType;
     }
 
     @Override
