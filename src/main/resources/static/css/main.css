@@ -1,10 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Golos+Text&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
-body, html {
-    overflow-x: hidden;
-    width: 100%;
-!important
-}
+
+/* ============ properties ============ */
 
 .givefont {
     font-family: "Montserrat", sans-serif;
@@ -19,7 +16,7 @@ body, html {
 }
 
 .givegradient:hover {
-    background: linear-gradient(to right, rgba(0, 255, 255, 0.1), rgba(0, 0, 255, 0.1));
+    background: linear-gradient(to right, rgba(0, 255, 255, 0.075), rgba(0, 0, 255, 0.075));
 }
 
 .addbg {
@@ -27,9 +24,33 @@ body, html {
     background-repeat: no-repeat;
     background-size: cover;
     background-position-x: 750px;
-    height: 700px;
+    height: 100vh;
 }
 
 .custom-bg-col {
     background: #F9FBFD;
+}
+
+/* ============ anim ============ */
+
+.fade-in {
+    animation: fadeIn 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    opacity: 0;
+}
+
+
+.fade-in-slower {
+    animation: fadeIn 1.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    opacity: 0;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

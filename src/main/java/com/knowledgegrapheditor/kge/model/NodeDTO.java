@@ -4,8 +4,8 @@ import java.util.UUID;
 
 public class NodeDTO {
 
-    private Iterable<String> labels;
-    private Map<String, Object> properties;
+    private final Iterable<String> labels;
+    private final Map<String, Object> properties;
 
     public NodeDTO(Iterable<String> labels, Map<String, Object> properties) {
         this.labels = labels;

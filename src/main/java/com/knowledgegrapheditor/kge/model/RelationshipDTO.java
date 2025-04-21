@@ -1,43 +1,26 @@
 package com.knowledgegrapheditor.kge.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.Map;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class RelationshipDTO {
 
-    private String startNodeId;
-    private String endNodeId;
-    private Map<String, Object> properties;
-    private String relationshipType;
+    String startNodeId;
+    String endNodeId;
+    Map<String, Object> properties;
+    String relationshipType;
 
-    // exclude properties
+    // constructor without the properties (optional)
     public RelationshipDTO(String startNodeId, String endNodeId, String relationshipType) {
         this.startNodeId = startNodeId;
         this.endNodeId = endNodeId;
         this.relationshipType = relationshipType;
-    }
-
-    // include properties
-    public RelationshipDTO(String startNodeId, String endNodeId, Map<String, Object> properties, String relationshipType) {
-        this.startNodeId = startNodeId;
-        this.endNodeId = endNodeId;
-        this.properties = properties;
-        this.relationshipType = relationshipType;
-    }
-
-    public String getStartNodeId() {
-        return startNodeId;
-    }
-
-    public String getEndNodeId() {
-        return endNodeId;
-    }
-
-    public Map<String, Object> getProperties() {
-        return properties;
-    }
-
-    public String getRelationshipType() {
-        return relationshipType;
     }
 
     @Override

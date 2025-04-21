@@ -1,0 +1,24 @@
+@import "main.css";
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.header {
+    padding: 1rem 2rem 0.5rem;
+}
+
+.toolbar {
+    background: #edf5fa;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+}
+
+#myDiagramDiv {
+    flex-grow: 1;
+    width: 100%;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+}
