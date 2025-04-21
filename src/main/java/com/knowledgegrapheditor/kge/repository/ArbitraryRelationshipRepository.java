@@ -12,5 +12,7 @@ public interface ArbitraryRelationshipRepository {
     RelationshipDTO findById(UUID id);
     RelationshipDTO findBySourceAndDestinationNodeId(UUID sourceId, UUID destinationId);
     RelationshipDTO create(UUID sourceNodeId, UUID destinationNodeId, String relationshipLabel, Map<String, Object> parameters);
-    RelationshipDTO modifyParameterOf(UUID nodeId, String property, Object updatedValue);
+    RelationshipDTO modifyLabelOf(UUID sourceNodeId, UUID destinationNodeId, String newLabel);
+
+
 }
