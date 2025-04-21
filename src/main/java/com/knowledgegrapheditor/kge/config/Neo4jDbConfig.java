@@ -25,7 +25,7 @@ public class Neo4jDbConfig {
 
     @Bean(name="UseDatabase")
     public SessionConfig getPreconfiguredNeo4jDatabaseSessionConfig() {
-        String dbName = "neo4j"; // change this to an arbitrary existent database's name
+        String dbName = "knowledgegrapheditor"; // change this to an arbitrary existent database's name
         return SessionConfig.forDatabase(dbName);
     }
 

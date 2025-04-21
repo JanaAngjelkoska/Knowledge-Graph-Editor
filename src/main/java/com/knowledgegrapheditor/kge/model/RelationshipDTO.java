@@ -1,45 +1,29 @@
 package com.knowledgegrapheditor.kge.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.Map;
+import java.util.UUID;
 
 public class RelationshipDTO {
 
-    String startNodeId;
-    String endNodeId;
-    Map<String, Object> properties;
-    String relationshipType;
-
-    // constructor without the properties (optional)
-    public RelationshipDTO(String startNodeId, String endNodeId, String relationshipType) {
-        this.startNodeId = startNodeId;
-        this.endNodeId = endNodeId;
-        this.relationshipType = relationshipType;
-    }
-
-    public RelationshipDTO(){}
+    private String startNodeElementId;
+    private String endNodeElementId;
+    private Map<String, Object> properties;
+    private String relationshipType;
 
 
-    public RelationshipDTO(String startNodeId, String endNodeId, Map<String, Object> properties, String relationshipType) {
-        this.startNodeId = startNodeId;
-        this.endNodeId = endNodeId;
+    public RelationshipDTO(String startNodeElementId, String endNodeElementId, Map<String, Object> properties, String relationshipType) {
+        this.startNodeElementId = startNodeElementId;
+        this.endNodeElementId = endNodeElementId;
         this.properties = properties;
         this.relationshipType = relationshipType;
     }
 
-
-
-    public String getStartNodeId() {
-        return startNodeId;
+    public String getStartNodeElementId() {
+        return startNodeElementId;
     }
 
-    public String getEndNodeId() {
-        return endNodeId;
+    public String getEndNodeElementId() {
+        return endNodeElementId;
     }
 
     public Map<String, Object> getProperties() {
@@ -53,8 +37,8 @@ public class RelationshipDTO {
     @Override
     public String toString() {
         return "RelationshipDTO{" +
-                "startNodeId=" + startNodeId +
-                ", endNodeId=" + endNodeId +
+                "startNodeId=" + startNodeElementId +
+                ", endNodeId=" + startNodeElementId +
                 ", relationshipType='" + relationshipType + '\'' +
                 ", properties=" + properties +
                 '}';

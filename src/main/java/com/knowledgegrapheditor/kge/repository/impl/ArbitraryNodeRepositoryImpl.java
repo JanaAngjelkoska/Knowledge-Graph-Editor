@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -26,8 +27,8 @@ public class ArbitraryNodeRepositoryImpl implements ArbitraryNodeRepository {
     }
 
     @Override
-    public NodeDTO findById(UUID id) {
-        try(Session session = driver.session(databaseConfig)) {
+    public Optional<NodeDTO> findById(UUID id) {
+        try (Session session = driver.session(databaseConfig)) {
 
             String referencer = "n";
 
@@ -35,9 +36,9 @@ public class ArbitraryNodeRepositoryImpl implements ArbitraryNodeRepository {
 
             Result result = session.run(queryBuild);
 
-            Record r = result.stream().findFirst().orElseThrow(() -> new Neo4jException("Record non-existent."));
+            Optional<Record> r = result.stream().findFirst();
 
-            return NodeSerializer.serialize(r, referencer);
+            return r.map(record -> NodeSerializer.serialize(record, referencer));
         }
     }
 
@@ -60,7 +61,12 @@ public class ArbitraryNodeRepositoryImpl implements ArbitraryNodeRepository {
 
     @Override
     public boolean deleteById(UUID id) {
-        try(Session session = driver.session(databaseConfig)) {
+
+        if (findById(id).isEmpty()) {
+            throw new IllegalArgumentException(String.format("Node with ID: %s does not exist", id));
+        }
+
+        try (Session session = driver.session(databaseConfig)) {
 
             String referencer = "n";
 
@@ -73,11 +79,17 @@ public class ArbitraryNodeRepositoryImpl implements ArbitraryNodeRepository {
     }
 
     @Override
-    public NodeDTO create(String nodeLabel, Map<String, Object> parameters) {
+    public NodeDTO create(Iterable<String> labels, Map<String, Object> parameters) {
 
         String referencer = "n";
+        StringBuilder labelConcat = new StringBuilder();
 
-        StringBuilder queryBuild = new StringBuilder(String.format("CREATE (%s:%s {", referencer, nodeLabel));
+
+        for (String label : labels) {
+            labelConcat.append(":").append(label);
+        }
+
+        StringBuilder queryBuild = new StringBuilder(String.format("CREATE (%s%s {", referencer, labelConcat));
 
         for (Map.Entry<String, Object> entry : parameters.entrySet()) {
             queryBuild.append(String.format("%s:\"%s\", ", entry.getKey(), entry.getValue().toString()));
@@ -87,11 +99,11 @@ public class ArbitraryNodeRepositoryImpl implements ArbitraryNodeRepository {
 
         queryBuild.append(String.format(" RETURN %s;", referencer));
 
-        try(Session session = driver.session(databaseConfig)) {
+        try (Session session = driver.session(databaseConfig)) {
 
             Result result = session.run(queryBuild.toString());
 
-            Record r = result.stream().findFirst().orElseThrow(() -> new Neo4jException("Record non-existent."));
+            Record r = result.stream().findFirst().orElseThrow(() -> new Neo4jException("Failure creating record."));
 
             return NodeSerializer.serialize(r, referencer);
         }
