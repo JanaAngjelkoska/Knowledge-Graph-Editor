@@ -1,4 +1,4 @@
-package com.knowledgegrapheditor.kge.web.api;
+package com.knowledgegrapheditor.kge.web;
 
 import com.knowledgegrapheditor.kge.model.NodeDTO;
 import com.knowledgegrapheditor.kge.repository.ArbitraryNodeRepository;
@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api")
-public class SiteController {
+public class SiteApiController {
 
     // todo Test code (to be changed)
     private final ArbitraryNodeRepository nodeRepository;
 
-    public SiteController(ArbitraryNodeRepository nodeRepository) {
+    public SiteApiController(ArbitraryNodeRepository nodeRepository) {
         this.nodeRepository = nodeRepository;
     }
 
