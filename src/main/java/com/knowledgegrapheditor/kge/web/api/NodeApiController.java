@@ -1,4 +1,4 @@
-package com.knowledgegrapheditor.kge.web;
+package com.knowledgegrapheditor.kge.web.api;
 
 import com.knowledgegrapheditor.kge.model.NodeDTO;
 import com.knowledgegrapheditor.kge.service.NodeService;
@@ -42,5 +42,10 @@ public class NodeApiController {
 
         return node.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping
+    public ResponseEntity<Iterable<NodeDTO>> getAllNodes() {
+        return ResponseEntity.ok(nodeService.findAllByLabel(""));
     }
 }

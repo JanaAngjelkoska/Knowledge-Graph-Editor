@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public interface ArbitraryNodeRepository {
     Iterable<NodeDTO> findAllByLabel(String label);
+    Iterable<NodeDTO> findAll();
     Optional<NodeDTO> findById(UUID id);
     boolean deleteById(UUID id);
     NodeDTO create(Iterable<String> nodeLabel, Map<String, Object> parameters);

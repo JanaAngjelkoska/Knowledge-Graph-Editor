@@ -60,6 +60,23 @@ public class ArbitraryNodeRepositoryImpl implements ArbitraryNodeRepository {
     }
 
     @Override
+    public Iterable<NodeDTO> findAll() {
+        String referencer = "n";
+
+        String query = String.format("MATCH (%s) RETURN %s", referencer, referencer);
+
+        try (Session session = driver.session(databaseConfig)) {
+
+            Result result = session.run(query);
+
+            return result
+                    .stream()
+                    .map(record -> NodeSerializer.serialize(record, referencer))
+                    .toList();
+        }
+    }
+
+    @Override
     public boolean deleteById(UUID id) {
 
         if (findById(id).isEmpty()) {
