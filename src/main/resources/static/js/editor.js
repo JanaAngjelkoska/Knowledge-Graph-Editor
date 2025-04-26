@@ -1,14 +1,13 @@
 import * as req from './requests.js';
-import {makeGet} from "./requests.js";
+import {makeGet, makePostPathVar} from "./requests.js";
 
 document.addEventListener("DOMContentLoaded", load_graph);
 
+// UI SETUP
 const $ = go.GraphObject.make;
 
-const currentNodes = []
-const currentEdges = []
-
 let graph;
+const deleteButton = document.getElementById('delete-btn');
 let editedProperties = {};
 let currentEditingNodeId = null;
 
@@ -56,7 +55,7 @@ async function linkGraphToBackend(graph) {
 }
 
 function load_graph() {
-    graph = $(go.Diagram, "myDiagramDiv", {
+    graph = $(go.Diagram, "graphDiv", {
         "undoManager.isEnabled": true,
         allowCopy: false,
         allowClipboard: false,
@@ -151,12 +150,12 @@ async function handleEditProperty() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(editedProperties) // send ALL modified properties
+            body: JSON.stringify(editedProperties)
         });
 
         if (response.ok) {
             console.log("Properties updated successfully");
-            editedProperties = {}; // Clear after successful save
+            editedProperties = {};
             linkGraphToBackend(graph);
         } else {
             console.error('Failed to update properties', await response.text());
@@ -166,20 +165,37 @@ async function handleEditProperty() {
     }
 }
 
-// async function handleDeleteProperty(li, data, key) {
-//     if (confirm(`Are you sure you want to delete the node"?`)) {
-//         try {
-//             await fetch(`api/nodes/delete/${data.id}`, {
-//                 method: 'DELETE',
-//                 headers: {
-//                     'Content-Type': 'application/json'
-//                 },
-//                 body: JSON.stringify({ key: key })
-//             });
-//             li.remove();
-//             console.log("Property deleted successfully");
-//         } catch (error) {
-//             console.error('Failed to delete property', error);
-//         }
-//     }
-// }
+// Get the delete button element
+
+// Add event listener for the delete button
+deleteButton.addEventListener('click', async function() {
+    const selectedNode = graph.selection.first(); // Use selection.first() to get the first selected node
+
+    if (selectedNode) {
+        const confirmation = confirm("Are you sure you want to delete the selected node?");
+        if (confirmation) {
+            try {
+                // Delete the node in the GoJS diagram
+                graph.commandHandler.deleteSelection();
+
+                console.log("Node deleted in GoJS");
+
+
+                const nodeId = selectedNode.data.key;
+
+                // Send POST request to the backend to delete the node
+                const response = await makePostPathVar(nodeId, "api/nodes/delete")
+
+                if (response.ok) {
+                    console.log("Node successfully deleted in the backend");
+                } else {
+                    console.error("Failed to delete node in the backend:", await response.text());
+                }
+            } catch (error) {
+                console.error("Error during node deletion:", error);
+            }
+        }
+    } else {
+        alert("Please select a node to delete.");
+    }
+});
