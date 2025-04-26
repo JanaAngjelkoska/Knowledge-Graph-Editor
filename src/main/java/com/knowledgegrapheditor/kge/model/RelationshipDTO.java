@@ -1,29 +1,30 @@
 package com.knowledgegrapheditor.kge.model;
 
 import java.util.Map;
-import java.util.UUID;
 
 public class RelationshipDTO {
 
-    private String startNodeElementId;
-    private String endNodeElementId;
+    private String startNodeId;
+    private String destinationNodeId;
     private Map<String, Object> properties;
     private String relationshipType;
 
 
-    public RelationshipDTO(String startNodeElementId, String endNodeElementId, Map<String, Object> properties, String relationshipType) {
-        this.startNodeElementId = startNodeElementId;
-        this.endNodeElementId = endNodeElementId;
+    public RelationshipDTO() {}
+
+    public RelationshipDTO(String startNodeId, String destinationNodeId, Map<String, Object> properties, String relationshipType) {
+        this.startNodeId = startNodeId;
+        this.destinationNodeId = destinationNodeId;
         this.properties = properties;
         this.relationshipType = relationshipType;
     }
 
-    public String getStartNodeElementId() {
-        return startNodeElementId;
+    public String getStartNodeId() {
+        return startNodeId;
     }
 
-    public String getEndNodeElementId() {
-        return endNodeElementId;
+    public String getDestinationNodeId() {
+        return destinationNodeId;
     }
 
     public Map<String, Object> getProperties() {
@@ -37,8 +38,8 @@ public class RelationshipDTO {
     @Override
     public String toString() {
         return "RelationshipDTO{" +
-                "startNodeId=" + startNodeElementId +
-                ", endNodeId=" + startNodeElementId +
+                "startNodeId=" + startNodeId +
+                ", endNodeId=" + startNodeId +
                 ", relationshipType='" + relationshipType + '\'' +
                 ", properties=" + properties +
                 '}';

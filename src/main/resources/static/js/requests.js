@@ -1,4 +1,4 @@
-const base = 'https://localhost:8080/api';
+const base = 'http://localhost:8080';
 
 /**
  * Creates an arbitrary POST request to any backend POST endpoint expecting a single path variable after the suffix.
@@ -61,29 +61,6 @@ export async function makePostJsonBody(postData, endpointSuffix) {
 export async function makeGetPathVar (pathVariable, endpointSuffix) {
 
     const url = `${base}/${endpointSuffix}/${pathVariable}`;
-
-    const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error(`Error establishing to: ${url}`);
-    }
-
-    return await response.json();
-}
-
-/**
- * Creates an arbitrary GET request to any backend endpoint not expecting anything.
- * @param endpointSuffix The endpoint (suffix) of the API.
- * @returns {Promise<any>} JSON containing requested result.
- **/
-export async function makeGet (endpointSuffix) {
-
-    const url = `${base}/${endpointSuffix}`;
 
     const response = await fetch(url, {
         method: 'GET',

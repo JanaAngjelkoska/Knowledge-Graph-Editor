@@ -46,6 +46,6 @@ public class NodeApiController {
 
     @GetMapping
     public ResponseEntity<Iterable<NodeDTO>> getAllNodes() {
-        return ResponseEntity.ok(nodeService.findAllByLabel(""));
+        return ResponseEntity.ok(nodeService.findAll());
     }
 }

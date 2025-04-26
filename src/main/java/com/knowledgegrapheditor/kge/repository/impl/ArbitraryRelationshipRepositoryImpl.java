@@ -1,6 +1,7 @@
 package com.knowledgegrapheditor.kge.repository.impl;
 
 import com.knowledgegrapheditor.kge.model.RelationshipDTO;
+import com.knowledgegrapheditor.kge.repository.ArbitraryNodeRepository;
 import com.knowledgegrapheditor.kge.repository.ArbitraryRelationshipRepository;
 import com.knowledgegrapheditor.kge.util.RelationshipSerializer;
 import org.neo4j.driver.Driver;
@@ -19,11 +20,14 @@ import java.util.UUID;
 public class ArbitraryRelationshipRepositoryImpl implements ArbitraryRelationshipRepository {
 
     private final Driver driver;
+    private final ArbitraryNodeRepository nodeRepository;
     private final SessionConfig sessionConfig;
 
     public ArbitraryRelationshipRepositoryImpl(Driver driver,
+                                               ArbitraryNodeRepository nodeRepository,
                                                @Qualifier("UseDatabase") SessionConfig sessionConfig) {
         this.driver = driver;
+        this.nodeRepository = nodeRepository;
         this.sessionConfig = sessionConfig;
     }
 
@@ -32,7 +36,7 @@ public class ArbitraryRelationshipRepositoryImpl implements ArbitraryRelationshi
     public Iterable<RelationshipDTO> findAll() {
         try (Session session = driver.session(sessionConfig)) {
             String referencer = "relationship";
-            String query = String.format("MATCH ()-[%s]->() RETURN %s", referencer, referencer);
+            String query = String.format("MATCH (a)-[%s]->(b) RETURN %s;", referencer, referencer);
 
             Result result = session.run(query);
 
@@ -48,7 +52,7 @@ public class ArbitraryRelationshipRepositoryImpl implements ArbitraryRelationshi
     public Optional<RelationshipDTO> findById(UUID id) {
         try (Session session = driver.session(sessionConfig)) {
             String referencer = "relationship";
-            String query = String.format("MATCH ()-[%s]->() WHERE %s.id = $id RETURN %s", referencer, referencer, referencer);
+            String query = String.format("MATCH (a)-[%s]->(b) WHERE %s.id = $id RETURN %s", referencer, referencer, referencer);
 
             Map<String, Object> queryParameters = new HashMap<>();
             queryParameters.put("id", id.toString());
@@ -74,6 +78,7 @@ public class ArbitraryRelationshipRepositoryImpl implements ArbitraryRelationshi
             queryParameters.put("destinationNodeId", destinationId.toString());
 
             Result result = session.run(query, queryParameters);
+
             return result
                     .stream()
                     .map(record -> RelationshipSerializer.serialize(record, referencer))
@@ -93,7 +98,7 @@ public class ArbitraryRelationshipRepositoryImpl implements ArbitraryRelationshi
                     .append(referencer)
                     .append(":")
                     .append(relationshipLabel)
-                    .append(" {id: $id");
+                    .append(" {id: $id, sourceNodeId: $sourceNodeId, destinationNodeId: $destinationNodeId");
 
             for (Map.Entry<String, Object> entry : properties.entrySet()) {
                 queryBuild.append(", ").append(entry.getKey()).append(": $").append(entry.getKey());
@@ -121,7 +126,7 @@ public class ArbitraryRelationshipRepositoryImpl implements ArbitraryRelationshi
     public Optional<RelationshipDTO> modifyLabelOf(UUID sourceNodeId, UUID destinationNodeId, String newLabel) {
         try (Session session = driver.session(sessionConfig)) {
             // Find the existing relationship between source and destination nodes
-            String query = "MATCH (a)-[r]->(b) WHERE ID(a) = $sourceNodeId AND ID(b) = $destinationNodeId " +
+            String query = "MATCH (a)-[r]->(b) WHERE a.id = $sourceNodeId AND b.id = $destinationNodeId " +
                     "CREATE (a)-[newRel:" + newLabel + "]->(b) DELETE r " +
                     "RETURN newRel";
 

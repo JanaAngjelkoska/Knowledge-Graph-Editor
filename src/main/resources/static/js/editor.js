@@ -1,8 +1,15 @@
+import * as req from './requests.js';
+import {makeGet} from "./requests.js";
+
 document.addEventListener("DOMContentLoaded", load_graph);
 
 const $ = go.GraphObject.make;
 
+const currentNodes = []
+const currentEdges = []
+
 function graphStyleProps(myDiagram) {
+
     myDiagram.nodeTemplate =
         $(go.Node, "Auto",
             $(go.Shape, "Circle", {
@@ -14,30 +21,31 @@ function graphStyleProps(myDiagram) {
             }),
             $(go.TextBlock, {
                     margin: 6,
-                    font: "11px Montserrat",
+                    font: "9px Montserrat",
                     textAlign: "center"
                 },
                 new go.Binding("text", "text"))
         );
 }
 
-function linkGraphToBackend(myDiagram) {
-    const nodes = [{key: 0, text: "Center"}];
-    for (let i = 1; i <= 9; i++) {
-        nodes.push({key: i, text: `Node ${i}`});
-    }
+async function linkGraphToBackend(myDiagram) {
+    const nodes = await makeGet("api/nodes");
+    const edges = await makeGet("api/relationships");
 
-    const links = nodes.slice(1).map(n => ({from: 0, to: n.key}));
+    const nodeDataArray = nodes.map(node => ({
+        key: node.properties.id,     // or whatever field you have as a unique ID
+        text: node.labels[0]   // or another property you want displayed
+    }));
 
-    for (let i = 10; i <= 15; i++) {
-        nodes.push({key: i, text: `Node ${i}`});
-    }
+    const linkDataArray = edges.map(edge => ({
+        from: edge.startNodeId, // where the link starts
+        to: edge.destinationNodeId  // where the link points
+    }));
 
-    const links2 = nodes.slice(10).map(n => ({from: 2, to: n.key}));
 
-    const finalLinks = links.concat(links2);
-
-    myDiagram.model = new go.GraphLinksModel(nodes, finalLinks);
+    console.log(nodes);
+    console.log(edges);
+    myDiagram.model = new go.GraphLinksModel(nodeDataArray, linkDataArray);
 }
 
 function load_graph() {

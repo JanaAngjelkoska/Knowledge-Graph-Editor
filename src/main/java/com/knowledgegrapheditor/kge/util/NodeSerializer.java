@@ -13,7 +13,7 @@ public class NodeSerializer {
      * @return A data transfer object containing a node's labels and it's properties.
      */
     public static NodeDTO serialize(Record record, String referencer) {
-        return new NodeDTO (
+        return new NodeDTO(
                 record.get(referencer).asNode().labels(),
                 record.get(referencer).asNode().asMap()
         );

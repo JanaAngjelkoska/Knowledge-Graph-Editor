@@ -25,8 +25,8 @@ public class RelationshipApiController {
     @PostMapping("/create")
     public ResponseEntity<RelationshipDTO> createRelationship(@RequestBody RelationshipDTO request) {
 
-        UUID sourceId = UUID.fromString(request.getStartNodeElementId());
-        UUID destinationId = UUID.fromString(request.getStartNodeElementId());
+        UUID sourceId = UUID.fromString(request.getStartNodeId());
+        UUID destinationId = UUID.fromString(request.getDestinationNodeId());
 
         RelationshipDTO relationship = relationshipRepository.create(
                 sourceId, // may me useless information
@@ -85,5 +85,10 @@ public class RelationshipApiController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
+    }
+
+    @GetMapping
+    public ResponseEntity<Iterable<RelationshipDTO>> findAll() {
+        return ResponseEntity.ok(relationshipRepository.findAll());
     }
 }
