@@ -135,12 +135,11 @@ public class ArbitraryNodeRepositoryImpl implements ArbitraryNodeRepository {
         String id = _id.toString();
         String referencer = "n";
         String query = String.format(
-                "MATCH (%s {id: $id}) SET %s.%s = $value RETURN %s",
+                "MATCH (%s {id: $id}) SET %s.%s = $value RETURN %s;",
                 referencer, referencer, key, referencer
         );
 
         try (Session session = driver.session(databaseConfig)) {
-            Map<String, Object> updateMap = Map.of(key, value);
 
             Result result = session.run(query,
                     Values.parameters("id", id, "value", value)

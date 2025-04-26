@@ -8,9 +8,13 @@ const $ = go.GraphObject.make;
 const currentNodes = []
 const currentEdges = []
 
-function graphStyleProps(myDiagram) {
+let graph;
+let editedProperties = {};
+let currentEditingNodeId = null;
 
-    myDiagram.nodeTemplate =
+function graphStyleProps(graph) {
+
+    graph.nodeTemplate =
         $(go.Node, "Auto",
             $(go.Shape, "Circle", {
                 fill: "#328da2",
@@ -29,7 +33,7 @@ function graphStyleProps(myDiagram) {
         );
 }
 
-async function linkGraphToBackend(myDiagram) {
+async function linkGraphToBackend(graph) {
     const nodes = await makeGet("api/nodes");
     const edges = await makeGet("api/relationships");
 
@@ -48,11 +52,11 @@ async function linkGraphToBackend(myDiagram) {
 
     console.log(nodes);
     console.log(edges);
-    myDiagram.model = new go.GraphLinksModel(nodeDataArray, linkDataArray);
+    graph.model = new go.GraphLinksModel(nodeDataArray, linkDataArray);
 }
 
 function load_graph() {
-    const myDiagram = $(go.Diagram, "myDiagramDiv", {
+    graph = $(go.Diagram, "myDiagramDiv", {
         "undoManager.isEnabled": true,
         allowCopy: false,
         allowClipboard: false,
@@ -65,11 +69,10 @@ function load_graph() {
         })
     });
 
-    graphStyleProps(myDiagram);
-    linkGraphToBackend(myDiagram);
+    graphStyleProps(graph);
+    linkGraphToBackend(graph);
 
-    // ADD THE LISTENER **HERE**, after myDiagram is created
-    myDiagram.addDiagramListener("ObjectSingleClicked", function (e) {
+    graph.addDiagramListener("ObjectSingleClicked", function (e) {
         const part = e.subject.part;
 
         if (!(part instanceof go.Node || part instanceof go.Link)) return;
@@ -84,28 +87,83 @@ function load_graph() {
 }
 
 
-async function handleEditProperty(input, data, key) {
-    input.focus();
 
-    console.log("Input: ", input)
-    console.log("Data", data, " data.id = ", data.key)
-    console.log("Key: ", key)
+function showNodeInfo(data) {
+    const sidebar = document.querySelector(".side-bar");
+    sidebar.querySelector(".display-name").textContent = data.text || "Unnamed Node";
 
-    input.addEventListener('blur', async () => {
-        const newValue = input.value;
-        try {
-            await fetch(`api/nodes/edit/${data.key}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ key: key, value: newValue })
+    const propertiesList = sidebar.querySelector(".properties ul");
+    propertiesList.innerHTML = "";
+
+    editedProperties = {}; // Reset edited properties
+    currentEditingNodeId = data.properties.id; // Save current node id
+
+    const props = data.properties || {};
+    const keys = Object.keys(props).sort();
+
+    keys.forEach(key => {
+        const value = props[key];
+        if (key !== 'id') {
+            const li = document.createElement("li");
+            li.innerHTML = `
+                <div>${key}:</div> 
+                <input type="text" value="${value}" style="width: 150px;" data-key="${key}" />
+                <span>
+                    <i class="bi bi-trash mx-1 delete-btn" style="cursor: pointer; color: dimgray; font-size: 1.3em;"></i>
+                </span>
+            `;
+            propertiesList.appendChild(li);
+
+            const input = li.querySelector('input');
+
+            // Listen for user edits
+            input.addEventListener('input', () => {
+                editedProperties[key] = input.value;
             });
-            console.log("Property updated successfully");
-        } catch (error) {
-            console.error('Failed to update property', error);
         }
-    }, { once: true });
+    });
+
+    const save_changes_button = document.querySelector(".save-changes-button");
+    save_changes_button.onclick = handleEditProperty; // Set up save button once
+
+    const li_add_new = document.createElement("li");
+    li_add_new.innerHTML = `
+        <span>
+          <i class="bi bi-plus-circle-fill mx-1" style="cursor: pointer; color: dimgray; font-size: 1.3rem;"></i>
+          <span class="add-new-msg">Add a new property</span>
+        </span>
+    `;
+    propertiesList.appendChild(li_add_new);
+}
+
+async function handleEditProperty() {
+    if (!currentEditingNodeId || Object.keys(editedProperties).length === 0) {
+        console.log("Nothing to save.");
+        return;
+    }
+
+    console.log("Saving changes for node:", currentEditingNodeId);
+    console.log("Properties to save:", editedProperties);
+
+    try {
+        const response = await fetch(`api/nodes/edit/${currentEditingNodeId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(editedProperties) // send ALL modified properties
+        });
+
+        if (response.ok) {
+            console.log("Properties updated successfully");
+            editedProperties = {}; // Clear after successful save
+            linkGraphToBackend(graph);
+        } else {
+            console.error('Failed to update properties', await response.text());
+        }
+    } catch (error) {
+        console.error('Error occurred while updating properties', error);
+    }
 }
 
 // async function handleDeleteProperty(li, data, key) {
@@ -125,52 +183,3 @@ async function handleEditProperty(input, data, key) {
 //         }
 //     }
 // }
-
-function showNodeInfo(data) {
-    const sidebar = document.querySelector(".side-bar");
-    sidebar.querySelector(".display-name").textContent = data.text || "Unnamed Node";
-
-    const propertiesList = sidebar.querySelector(".properties ul");
-    propertiesList.innerHTML = "";
-    console.log("DATA:", data)
-    const props = data.properties || {};
-    console.log(props)
-
-    const delete_btn_for_node = document.querySelector('.display-name-bin')
-    delete_btn_for_node.innerHTML = `
-      <i class="bi bi-trash mx-1 delete-btn-node" style="cursor: pointer; color: dimgray; font-size: 1.3em;"></i>
-    `
-
-    const keys = Object.keys(props).sort();
-    keys.forEach(key => {
-        const value = props[key];
-        if (key !== 'id') {
-            const li = document.createElement("li");
-            li.innerHTML = `
-                <div>${key}:</div> 
-                <input type="text" value="${value}" style="width: 150px;" />
-                <span>
-                    <i class="bi bi-trash mx-1 delete-btn" style="cursor: pointer; color: dimgray; font-size: 1.3em;"></i>
-                </span>
-            `;
-            propertiesList.appendChild(li);
-
-            const edit_input = li.querySelector('input');
-            const save_changes_button = document.querySelector(".save-changes-button");
-
-            save_changes_button.addEventListener('click', () => handleEditProperty(edit_input, data, key));
-            // delete_btn_for_node.addEventListener('click', () => handleDeleteProperty(li, data, key));
-        }
-    });
-
-    const li_add_new = document.createElement("li");
-    li_add_new.innerHTML = `
-        <span>
-          <i class="bi bi-plus-circle-fill mx-1" style="cursor: pointer; color: dimgray; font-size: 1.3rem;"></i>
-          <span class="add-new-msg">Add a new property</span>
-        </span>
-    `;
-    propertiesList.appendChild(li_add_new);
-}
-
-

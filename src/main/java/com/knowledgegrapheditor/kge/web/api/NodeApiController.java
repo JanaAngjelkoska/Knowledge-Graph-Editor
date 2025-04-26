@@ -46,6 +46,9 @@ public class NodeApiController {
     @PatchMapping("/edit/{id}")
     public ResponseEntity<List<NodeDTO>> editNode(@PathVariable("id") UUID id, @RequestBody Map<String, Object> request) {
         List<NodeDTO> list = new ArrayList<>();
+
+        System.out.println(request.toString()); // debug
+
         for (Map.Entry<String, Object> entry : request.entrySet()) {
             Optional<NodeDTO> node = nodeService.editProperty(id, entry.getKey(), entry.getValue());
             list.add(node.get());
