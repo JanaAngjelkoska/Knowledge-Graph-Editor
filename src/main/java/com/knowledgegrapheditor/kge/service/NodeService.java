@@ -1,6 +1,7 @@
 package com.knowledgegrapheditor.kge.service;
 
 import com.knowledgegrapheditor.kge.model.NodeDTO;
+import org.w3c.dom.Node;
 
 import java.util.Map;
 import java.util.Optional;
@@ -16,4 +17,6 @@ public interface NodeService {
     boolean deleteById(UUID id);
 
     NodeDTO create(Iterable<String> nodeLabel, Map<String, Object> parameters);
+
+    Optional<NodeDTO> editProperty(UUID id, String propertyKey, Object propertyValue);
 }

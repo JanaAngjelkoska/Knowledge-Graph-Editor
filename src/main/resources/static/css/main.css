@@ -10,15 +10,29 @@
     font-style: normal;
 }
 
+
+
 .givegradient {
     background: linear-gradient(to right, rgba(0, 255, 255, 0.05), rgba(0, 0, 255, 0.05));
     transition: background 0.3s ease; /* Smooth transition for the background */
 }
-
+.label{
+    font-size: 20px;
+    font-weight: bold;
+}
 .givegradient:hover {
     background: linear-gradient(to right, rgba(0, 255, 255, 0.075), rgba(0, 0, 255, 0.075));
 }
 
+.properties ul li{
+    margin-top: 10px;
+}
+.add-new-msg{
+    /*margin-left: 10px;*/
+    font-size: 13px;
+    color: gray;
+    font-style: italic;
+}
 .addbg {
     background-image: url("../img/land.png");
     background-repeat: no-repeat;

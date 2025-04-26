@@ -126,4 +126,32 @@ public class ArbitraryNodeRepositoryImpl implements ArbitraryNodeRepository {
         }
 
     }
+
+    @Override
+    public Optional<NodeDTO> updateProperties(UUID _id, String key, Object value) {
+        if (findById(_id).isEmpty()) {
+            throw new IllegalArgumentException(String.format("Node with ID: %s does not exist", _id));
+        }
+        String id = _id.toString();
+        String referencer = "n";
+        String query = String.format(
+                "MATCH (%s {id: $id}) SET %s.%s = $value RETURN %s",
+                referencer, referencer, key, referencer
+        );
+
+        try (Session session = driver.session(databaseConfig)) {
+            Map<String, Object> updateMap = Map.of(key, value);
+
+            Result result = session.run(query,
+                    Values.parameters("id", id, "value", value)
+            );
+
+            return result.stream()
+                    .map(record -> NodeSerializer.serialize(record, referencer))
+                    .findFirst();
+        }
+    }
+
+
+
 }

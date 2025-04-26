@@ -43,4 +43,11 @@ public class NodeServiceImpl implements NodeService {
         return nodeRepository.create(nodeLabels, parameters);
     }
 
+    @Override
+    public Optional<NodeDTO> editProperty(UUID id, String propertyKey, Object propertyValue) {
+        return nodeRepository.updateProperties(id, propertyKey, propertyValue);
+    }
+
+
+
 }

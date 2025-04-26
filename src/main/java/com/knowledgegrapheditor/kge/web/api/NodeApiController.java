@@ -6,8 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/nodes")
@@ -43,6 +42,18 @@ public class NodeApiController {
         return node.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    @PatchMapping("/edit/{id}")
+    public ResponseEntity<List<NodeDTO>> editNode(@PathVariable("id") UUID id, @RequestBody Map<String, Object> request) {
+        List<NodeDTO> list = new ArrayList<>();
+        for (Map.Entry<String, Object> entry : request.entrySet()) {
+            Optional<NodeDTO> node = nodeService.editProperty(id, entry.getKey(), entry.getValue());
+            list.add(node.get());
+        }
+
+        return ResponseEntity.ok(list);
+    }
+
 
     @GetMapping
     public ResponseEntity<Iterable<NodeDTO>> getAllNodes() {
