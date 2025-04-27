@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"/>
+    <meta charset="UTF-8">
     <title>Knowledge Graph Editor</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"/>
-    <link rel="stylesheet" href="./css/editor.css"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="./css/editor.css">
 </head>
 <body>
 <div class="main-container givefont custom-bg-col container-fluid">
@@ -14,16 +14,17 @@
             <img src="./img/logo.png" alt="Logo" width="40" height="40" class="d-inline-block align-text-top">
             <span class="ms-2 givefont">Knowledge Graph Editor</span>
         </a>
-        <a href="/" class="btn btn-transparent border-primary border-1 py-1 px-3 shadow-sm ">
+        <a href="/" class="btn btn-transparent border-primary border-1 py-1 px-3 shadow-sm">
             <i class="bi bi-arrow-return-left"></i> Back
         </a>
     </nav>
 
-    <div class="toolbar fade-in p-2 d-flex align-items-center mb-1 rounded p-2">
-        <button class="btn btn-sm btn-outline-secondary givefont me-2">
+    <div class="toolbar fade-in p-2 d-flex align-items-center mb-1 rounded">
+        <button class="btn btn-sm btn-outline-secondary givefont me-2" id="add-node-btn" data-bs-toggle="modal"
+                data-bs-target="#addNodeModal">
             <i class="bi bi-node-plus"></i> Add Node
         </button>
-        <button class="btn btn-sm btn-outline-secondary givefont me-2">
+        <button class="btn btn-sm btn-outline-secondary givefont me-2" id="connect-nodes-btn">
             <i class="bi bi-diagram-3"></i> Connect Nodes
         </button>
         <button class="btn btn-sm btn-outline-danger givefont" id="delete-btn">
@@ -31,12 +32,11 @@
         </button>
     </div>
 
-    <div class="container-fluid">
+    <div class="container-fluid fade-in mt-1">
         <div class="row">
-            <div class="side-bar bg-light col-3" style=" height: 100vh">
-
+            <div class="side-bar toolbar col-3 rounded" style="height: 100vh; overflow-y: auto;">
                 <div class="sidebar d-flex flex-column p-3">
-                    <div class="sidebar-header text-weight-bold">
+                    <div class="sidebar-header fw-bold">
                         Editing menu
                     </div>
 
@@ -45,39 +45,93 @@
                     <div class="label">Display name</div>
 
                     <div style="margin-top: 13px">
-                        <span class="display-name"></span><span class="display-name-bin"></span>
+                        <span class="display-name"></span>
+                        <span class="display-name-bin"></span>
                     </div>
-
-
 
                     <hr>
 
                     <div class="properties">
-                        <p class="label"> Properties:</p>
-                        <ul class="list-unstyled">
-<!--                            <li>Property : <input type="text" placeholder="value" style="width: 150px"> <span><i class="bi text-danger bi-trash"></i> <i class="bi text-primary bi-pencil"></i></span>   </li>-->
-<!--                            <li>Property : <input type="text" placeholder="value" style="width: 150px"> <span><i class="bi text-danger bi-trash"></i> <i class="bi text-primary bi-pencil"></i></span>   </li>-->
-<!--                            <li>Property : <input type="text" placeholder="value" style="width: 150px"> <span><i class="bi text-danger bi-trash"></i> <i class="bi text-primary bi-pencil"></i></span>   </li>-->
-<!--                            <li>Property : <input type="text" placeholder="value" style="width: 150px"> <span><i class="bi text-danger bi-trash"></i> <i class="bi text-primary bi-pencil"></i></span>   </li>-->
-<!--                            <p style="font-style: italic; font-palette: light">Add a new property</p>-->
+                        <p class="label">Properties:</p>
+                        <ul class="list-unstyled" id="properties-list">
                         </ul>
-
-                        <button class="btn btn-sm btn-outline-secondary givefont me-2 save-changes-button">
+                        <button class="btn btn-sm btn-outline-secondary givefont save-changes-button">
                             Save changes
                         </button>
                     </div>
 
                     <hr>
+                </div>
+            </div>
 
+            <div id="graphDiv" class="fade-in col mx-auto w-100" style="height: 100vh;"></div>
+        </div>
+    </div>
+
+    <!-- Modal for Adding Node -->
+    <div class="modal fade" id="addNodeModal" tabindex="-1" aria-labelledby="addNodeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-secondary-subtle">
+                    <h5 class="modal-title" id="addNodeModalLabel fw-bold">Create Node</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Labels Section -->
+                    <div class="mb-3">
+                        <label for="nodeLabels" class="form-label">Labels</label>
+                        <input type="text" class="form-control" id="nodeLabels" placeholder="Enter node labels">
+                    </div>
+
+                    <div class="properties">
+                        <p class="label">Properties:</p>
+                        <div class="mb-3">
+                            <label for="propertyKey" class="form-label">
+                                Display Name Key
+                                <i class="bi bi-info-circle-fill ms-1"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="right"
+                                   title="You can put any key here, it does not matter.">
+                                </i>
+                            </label>
+                            <input type="text" class="form-control" id="propertyKey"
+                                   placeholder="Enter arbitrary property key">
+                        </div>
+                        <div class="mb-3">
+                            <label for="propertyValue" class="form-label">
+                                Display Name Value
+                                <i class="bi bi-info-circle-fill ms-1"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="right"
+                                   title="The string you input here will display on the node.">
+                                </i>
+                            </label>
+                            <input type="text" class="form-control" id="propertyValue"
+                                            placeholder="Enter property value">
+                        </div>
+
+                        <span>
+                            <i class="bi bi-plus-circle-fill mx-1 add-property-btn"
+                               style="cursor: pointer; color: dimgray; font-size: 1.3rem;">
+                                <span class="add-new-msg">Add a new property</span>
+                            </i>
+                        </span>
+
+                        <ul class="list-unstyled mt-3" id="propertyList">
+                        </ul>
+                    </div>
                 </div>
 
-
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="createNodeBtn">Create Node</button>
+                </div>
             </div>
-            <div id="graphDiv" class="fade-in col mx-auto w-100" style="height: 100vh;"></div>
         </div>
     </div>
 </div>
 
+<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://unpkg.com/gojs/release/go.js"></script>
 <script type="module" src="./js/editor.js"></script>

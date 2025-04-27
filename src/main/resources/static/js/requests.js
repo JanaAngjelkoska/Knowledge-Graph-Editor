@@ -4,6 +4,7 @@ const base = 'http://localhost:8080';
  * Creates an arbitrary POST request to any backend POST endpoint expecting a single path variable after the suffix.
  * @param pathVariable A path variable containing data (probably ID) for the specified endpoint.
  * @param endpointSuffix The endpoint (suffix) of the API.
+ * @param method HTTP Protocol method to use;
  * @returns {Promise<any>} JSON containing requested result.
  */
 export async function makePostPathVar(pathVariable, endpointSuffix) {
@@ -19,7 +20,7 @@ export async function makePostPathVar(pathVariable, endpointSuffix) {
     });
 
     if (!response.ok) {
-        throw new Error(`Error establishing to: ${url}`);
+        throw new Error(`Could not fulfill request, got: ${response}`);
     }
 
     return await response.json();
@@ -45,9 +46,13 @@ export async function makePostJsonBody(postData, endpointSuffix) {
             postData
         )
     });
+
+    console.log(response)
+
     if (!response.ok) {
-        throw new Error(`Error establishing to: ${url}`);
+        throw new Error(`Could not fulfill request, got: ${response}`)
     }
+
 
     return await response.json();
 }
