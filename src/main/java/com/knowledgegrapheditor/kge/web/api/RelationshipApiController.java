@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,21 +23,22 @@ public class RelationshipApiController {
     }
 
 
-    @PostMapping("/create")
-    public ResponseEntity<RelationshipDTO> createRelationship(@RequestBody RelationshipDTO request) {
-
-        UUID sourceId = UUID.fromString(request.getStartNodeId());
-        UUID destinationId = UUID.fromString(request.getDestinationNodeId());
+    @PostMapping("/create/{startNodeId}/{endNodeId}")
+    public ResponseEntity<RelationshipDTO> createRelationship(
+            @PathVariable UUID startNodeId,
+            @PathVariable UUID endNodeId,
+            @RequestBody RelationshipDTO request) {
 
         RelationshipDTO relationship = relationshipService.create(
-                sourceId, // may me useless information
-                destinationId, // may be useless information
-                request.getRelationshipType(),
-                request.getProperties()
+                startNodeId,
+                endNodeId,
+                request.getRelationshipType(),  // use the request's relationship type
+                new HashMap<>()
         );
 
         return new ResponseEntity<>(relationship, HttpStatus.CREATED);
     }
+
 
     @GetMapping("/search/{relationshipId}")
     public ResponseEntity<RelationshipDTO> searchRelationshipById(@PathVariable UUID relationshipId) {

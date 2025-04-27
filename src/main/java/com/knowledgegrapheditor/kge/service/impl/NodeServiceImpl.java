@@ -48,6 +48,13 @@ public class NodeServiceImpl implements NodeService {
         return nodeRepository.updateProperties(id, propertyKey, propertyValue);
     }
 
+    @Override
+    public Optional<NodeDTO> deleteProperty(UUID id, String propertyKey) {
+        return nodeRepository.deleteProperty(id, propertyKey);
+    }
+
+
+
 
 
 }

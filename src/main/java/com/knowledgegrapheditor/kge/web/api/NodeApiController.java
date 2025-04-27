@@ -62,4 +62,15 @@ public class NodeApiController {
     public ResponseEntity<Iterable<NodeDTO>> getAllNodes() {
         return ResponseEntity.ok(nodeService.findAll());
     }
+
+
+    @RequestMapping(value = "/delete-property/{id}/{propertyKey}", method = RequestMethod.DELETE)
+    public ResponseEntity<Void> deleteProperty(@PathVariable UUID id, @PathVariable String propertyKey) {
+        Optional<NodeDTO> result = nodeService.deleteProperty(id, propertyKey);
+        return result.isPresent() ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
 }
+
+
+
+

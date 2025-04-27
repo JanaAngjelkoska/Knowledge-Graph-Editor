@@ -19,4 +19,6 @@ public interface NodeService {
     NodeDTO create(Iterable<String> nodeLabel, Map<String, Object> parameters);
 
     Optional<NodeDTO> editProperty(UUID id, String propertyKey, Object propertyValue);
+
+    Optional<NodeDTO> deleteProperty(UUID id, String propertyKey);
 }

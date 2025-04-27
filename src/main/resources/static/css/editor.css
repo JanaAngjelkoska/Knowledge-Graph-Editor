@@ -10,9 +10,35 @@
     padding: 1rem 2rem 0.5rem;
 }
 
+.side-bar {
+    border-top: 2px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 0 3px rgba(0, 0, 0, 10%);
+}
+
+html, body {
+    height: 100%;
+}
+
+.main-container {
+    height: 100%;
+}
+
+.container-fluid.fade-in.mt-1 {
+    height: calc(100% - 80px); /* Subtract navbar height if needed */
+}
+
+.row {
+    height: 100%;
+}
+
+.side-bar {
+    height: 100%;
+}
+
 .toolbar {
-    background: #edf5fa;
+    background: #eff3ff;
     border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 0 3px rgba(0, 0, 0, 10%);
 }
 
 #myDiagramDiv {

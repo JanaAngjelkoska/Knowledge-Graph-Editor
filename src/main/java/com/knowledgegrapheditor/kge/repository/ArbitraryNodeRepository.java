@@ -13,4 +13,6 @@ public interface ArbitraryNodeRepository {
     boolean deleteById(UUID id);
     NodeDTO create(Iterable<String> nodeLabel, Map<String, Object> parameters);
     Optional<NodeDTO> updateProperties(UUID id, String key, Object value);
+
+    Optional<NodeDTO> deleteProperty(UUID _id, String key);
 }

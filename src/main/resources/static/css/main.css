@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Golos+Text&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
-
 /* ============ properties ============ */
 
 .givefont {
@@ -9,8 +8,6 @@
     text-decoration: none;
     font-style: normal;
 }
-
-
 
 .givegradient {
     background: linear-gradient(to right, rgba(0, 255, 255, 0.05), rgba(0, 0, 255, 0.05));
@@ -27,12 +24,14 @@
 .properties ul li{
     margin-top: 10px;
 }
+
 .add-new-msg{
     /*margin-left: 10px;*/
     font-size: 13px;
     color: gray;
     font-style: italic;
 }
+
 .addbg {
     background-image: url("../img/land.png");
     background-repeat: no-repeat;

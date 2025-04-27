@@ -151,6 +151,24 @@ public class ArbitraryNodeRepositoryImpl implements ArbitraryNodeRepository {
         }
     }
 
+    @Override
+    public Optional<NodeDTO> deleteProperty(UUID _id, String key) {
+        if (findById(_id).isEmpty()) {
+            throw new IllegalArgumentException(String.format("Node with ID: %s does not exist", _id));
+        }
+        String id = _id.toString();
+        String referencer = "n";
+        String query = String.format(
+                "MATCH (%s {id: $id}) REMOVE %s.%s RETURN %s;",
+                referencer, referencer, key, referencer
+        );
+        try (Session session = driver.session(databaseConfig)) {
+            Result result = session.run(query, Values.parameters("id", id));
+            return result.stream()
+                    .map(record -> NodeSerializer.serialize(record, referencer))
+                    .findFirst();
+        }
+    }
 
 
 }
