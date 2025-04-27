@@ -1,5 +1,6 @@
 package com.knowledgegrapheditor.kge.web.api;
 
+import com.knowledgegrapheditor.kge.model.NodeDTO;
 import com.knowledgegrapheditor.kge.model.RelationshipDTO;
 import com.knowledgegrapheditor.kge.repository.ArbitraryNodeRepository;
 import com.knowledgegrapheditor.kge.repository.ArbitraryRelationshipRepository;
@@ -8,9 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/relationships")
@@ -93,4 +92,19 @@ public class RelationshipApiController {
     public ResponseEntity<Iterable<RelationshipDTO>> findAll() {
         return ResponseEntity.ok(relationshipService.findAll());
     }
+
+//    @PatchMapping("/edit/{id}")
+//    public ResponseEntity<List<NodeDTO>> editNode(@PathVariable("id") UUID id, @RequestBody Map<String, Object> request) {
+//        List<NodeDTO> list = new ArrayList<>();
+//
+//        System.out.println(request.toString()); // debug
+//
+//        for (Map.Entry<String, Object> entry : request.entrySet()) {
+//            Optional<NodeDTO> node = relationshipService.modifyLabelOf(id, entry.getKey(), entry.getValue());
+//            list.add(node.get());
+//        }
+//
+//        return ResponseEntity.ok(list);
+//    }
 }
+

@@ -78,7 +78,8 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-secondary-subtle">
-                    <h5 class="modal-title" id="addNodeModalLabel fw-bold"><i class="bi bi-node-plus m-1"></i>Node Creation</h5>
+                    <h5 class="modal-title" id="addNodeModalLabel fw-bold"><i class="bi bi-node-plus m-1"></i>Node
+                        Creation</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -143,7 +144,8 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-secondary-subtle">
-                <h5 class="modal-title" id="addRelationshipModalLabel">	<i class="bi bi-link-45deg m-1"></i>Connect Nodes</h5>
+                <h5 class="modal-title" id="addRelationshipModalLabel"><i class="bi bi-link-45deg m-1"></i>Connect Nodes
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -158,8 +160,40 @@
                         <select class="form-select" id="node2" required>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary">Connect</button>
+
+                    <div class="properties">
+                        <p class="label">Properties:</p>
+
+                        <div class="mb-3">
+                            <label for="propertyValue" class="form-label">
+                                Display Name Value
+                                <i class="bi bi-info-circle-fill ms-1"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="right"
+                                   title="The string you input here will display on the node.">
+                                </i>
+                            </label>
+                            <input type="text" class="form-control" id="propertyValueRelationship"
+                                   placeholder="Enter property value">
+                        </div>
+
+                        <span>
+                            <i class="bi bi-plus-circle-fill mx-1 add-property-btn"
+                               style="cursor: pointer; color: dimgray; font-size: 1.3rem;">
+                                <span class="add-new-msg">Add a new property</span>
+                            </i>
+                        </span>
+
+                        <ul class="list-unstyled mt-3" id="propertyListRelationship">
+                        </ul>
+                    </div>
                 </form>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="createRelationshipBtn">Create Relationship
+                    </button>
+                </div>
 
             </div>
         </div>

@@ -125,20 +125,14 @@ public class ArbitraryRelationshipRepositoryImpl implements ArbitraryRelationshi
     @Override
     public Optional<RelationshipDTO> modifyLabelOf(UUID sourceNodeId, UUID destinationNodeId, String newLabel) {
         try (Session session = driver.session(sessionConfig)) {
-            // Find the existing relationship between source and destination nodes
             String query = "MATCH (a)-[r]->(b) WHERE a.id = $sourceNodeId AND b.id = $destinationNodeId " +
                     "CREATE (a)-[newRel:" + newLabel + "]->(b) DELETE r " +
                     "RETURN newRel";
 
-            // Prepare query parameters
             Map<String, Object> queryParameters = new HashMap<>();
             queryParameters.put("sourceNodeId", sourceNodeId.toString());
             queryParameters.put("destinationNodeId", destinationNodeId.toString());
-
-            // Execute the query
             Result result = session.run(query, queryParameters);
-
-            // Return the modified relationship, or throw an error if not found
             return result
                     .stream()
                     .map(record -> RelationshipSerializer.serialize(record, "newRel"))

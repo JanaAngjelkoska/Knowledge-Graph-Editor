@@ -6,7 +6,7 @@ const $ = go.GraphObject.make;
 const deleteButton = document.getElementById('delete-btn');
 let graph;
 let editedProperties = {};
-let currentEditingNodeId = null;
+let currentEditingEntity = null;
 const connect_nodes_button = document.querySelector('.connect-nodes')
 
 
@@ -83,7 +83,8 @@ async function linkGraphToBackend(graph) {
     const linkDataArray = edges.map(edge => ({
         from: edge.startNodeId,
         to: edge.destinationNodeId,
-        text: edge.relationshipType
+        text: edge.relationshipType,
+        id : edge.properties.id
     }));
 
     graph.model = new go.GraphLinksModel(nodeDataArray, linkDataArray);
@@ -114,31 +115,50 @@ function load_graph() {
         if (!(part instanceof go.Node || part instanceof go.Link)) return;
 
         if (part instanceof go.Node) {
-            showNodeInfo(part.data);
+            showInfo(part.data, "Node");
         } else if (part instanceof go.Link) {
-            showRelationshipInfo(part.data);
+            showInfo(part.data, "Relationship");
         }
     });
 }
 
-function showNodeInfo(data) {
+function showInfo(data, type) {
     const sidebar = document.querySelector(".side-bar");
-    sidebar.querySelector(".display-class").textContent = " of label " + data.label || "Unnamed Node";
+    const props = data.properties || {};
 
+    if (type === "Node") {
+        showLabelForNode(sidebar, data, props)
+    } else {
+        showLabelForRelationship(sidebar, data, props)
+    }
+
+    showPropertiesForAllTypes(sidebar, data, props, type)
+
+}
+
+function showLabelForNode(sidebar, data, props) {
+    sidebar.querySelector(".display-class").textContent = " of label " + data.label || "Unnamed Node";
     const display_name = sidebar.querySelector(".display-name");
     display_name.innerHTML = " → ";
+    display_name.innerHTML += props.displayName;
+}
 
+function showLabelForRelationship(sidebar, data, props) {
+    sidebar.querySelector(".display-class").textContent = "(relationship label)"
+    const display_name = sidebar.querySelector(".display-name");
+    display_name.innerHTML = " → ";
+    display_name.innerHTML += data.text;
+}
+
+
+function showPropertiesForAllTypes(sidebar, data, props, type) {
     const propertiesList = sidebar.querySelector(".properties ul");
     propertiesList.innerHTML = "";
 
     editedProperties = {};
-    currentEditingNodeId = data.id ?? data.properties?.id ?? null;
+    currentEditingEntity = data.id ?? data.properties?.id ?? null;
 
-    const props = data.properties || {};
     const keys = Object.keys(props);
-
-    display_name.innerHTML += props.displayName;
-
     keys.forEach(key => {
         if (key !== 'id' && key !== 'displayName') {
             const li = createPropertyInput(key, props[key]);
@@ -147,7 +167,9 @@ function showNodeInfo(data) {
     });
 
     const saveChangesButton = document.querySelector(".save-changes-button");
-    saveChangesButton.onclick = handleEditProperty;
+    saveChangesButton.onclick = function() { handleEditProperty(type); };
+
+    console.log(type)
 
     const liAddNew = document.createElement("li");
     liAddNew.innerHTML = ` 
@@ -165,6 +187,7 @@ function showNodeInfo(data) {
     });
 }
 
+
 function createPropertyInput(key, value) {
     const li = document.createElement("li");
     li.innerHTML = `  
@@ -180,7 +203,7 @@ function createPropertyInput(key, value) {
     const deleteBtn = li.querySelector('.delete-btn');
 
     deleteBtn.addEventListener('click', async () => {
-        await deleteNodeProperty(currentEditingNodeId, keyInput.value.trim());
+        await deleteNodeProperty(currentEditingEntity, keyInput.value.trim());
         li.remove();
     });
 
@@ -205,9 +228,9 @@ async function deleteNodeProperty(nodeId, propertyKey) {
     }
 }
 
-async function handleEditProperty() {
-    if (!currentEditingNodeId) {
-        console.log("No node selected for editing.");
+async function handleEditProperty(type) {
+    if (!currentEditingEntity) {
+        console.log("No entity selected for editing.");
         return;
     }
 
@@ -231,26 +254,29 @@ async function handleEditProperty() {
 
     Object.assign(updatedProperties, editedProperties);
 
-    console.log("Saving changes for node:", currentEditingNodeId);
+    console.log("Saving changes for node:", currentEditingEntity);
     console.log("Properties to save:", updatedProperties);
 
-    try {
-        const response = await fetch(`api/nodes/edit/${currentEditingNodeId}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(updatedProperties)
-        });
+    if (type === "Node") {
+        console.log("SENDING REQUEST")
+        try {
+            const response = await fetch(`api/nodes/edit/${currentEditingEntity}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedProperties)
+            });
 
-        if (response.ok) {
-            console.log("Properties updated successfully.");
-            await linkGraphToBackend(graph);
-        } else {
-            console.error("Failed to update properties:", await response.text());
+            if (response.ok) {
+                console.log("Properties updated successfully.");
+                await linkGraphToBackend(graph);
+            } else {
+                console.error("Failed to update properties:", await response.text());
+            }
+        } catch (error) {
+            console.error("Error occurred while updating properties:", error);
         }
-    } catch (error) {
-        console.error("Error occurred while updating properties:", error);
     }
 }
 
@@ -313,31 +339,66 @@ document.querySelector(".add-property-btn").addEventListener("click", () => {
     });
 });
 
-deleteButton.addEventListener('click', async function () {
-    const selectedNode = graph.selection.first();
 
-    if (selectedNode) {
-        const confirmation = confirm("Are you sure you want to delete the selected node?");
+// graph.addDiagramListener("ObjectSingleClicked", function (e) {
+//     const part = e.subject.part;
+//
+//     if (!(part instanceof go.Node || part instanceof go.Link)) return;
+//
+//     if (part instanceof go.Node) {
+//         currentEntityType = "Node";
+//         showInfo(part.data, "Node");
+//     } else if (part instanceof go.Link) {
+//         currentEntityType = "Relationship";
+//         showInfo(part.data, "Relationship");
+//     }
+// });
+
+
+deleteButton.addEventListener('click', deleteEntity)
+
+async function deleteEntity() {
+    const selectedEntity = graph.selection.first();
+    console.log("Deleting the type of entity: ", selectedEntity);
+    let currentEntityType = ""
+
+    if (selectedEntity instanceof go.Node) {
+        console.log("Selected entity is a Node");
+        currentEntityType = "Node"
+    } else if (selectedEntity instanceof go.Link) {
+        console.log("Selected entity is a Link");
+        currentEntityType = "Relationship"
+    } else {
+        console.log("Selected entity is of unknown type");
+    }
+
+
+    if (selectedEntity) {
+        const confirmation = confirm("Are you sure you want to delete the selected entity?");
         if (confirmation) {
             try {
-                graph.commandHandler.deleteSelection();
+                if (currentEntityType === "Node") {
+                    graph.commandHandler.deleteSelection();
+                    const nodeId = selectedEntity.data.key;
+                    await makePostPathVar(nodeId, "api/nodes/delete");
 
-                console.log("Node deleted in GoJS");
-
-                const nodeId = selectedNode.data.key;
-
-                await makePostPathVar(nodeId, "api/nodes/delete")
+                } else if (currentEntityType === "Relationship") {
+                    graph.commandHandler.deleteSelection();
+                    const relationshipId = selectedEntity.data.id;
+                    await makePostPathVar(relationshipId, "api/relationships/delete");
+                }
 
                 await linkGraphToBackend(graph);
 
             } catch (error) {
-                console.error("Error during node deletion: ", error);
+                console.error("Error during deletion: ", error);
             }
         }
     } else {
-        alert("Please select a node to delete.");
+        alert("Please select a node or relationship to delete.");
     }
-});
+}
+
 
 function populateNodeDropdowns(graph) {
     const node1Select = document.getElementById('node1');
@@ -346,7 +407,7 @@ function populateNodeDropdowns(graph) {
 
     node1Select.innerHTML = '';
     node2Select.innerHTML = '';
-
+    // TODO get values of properties
     graph.nodes.each(function (node) {
         const label = node.data.text;
         const nodeId = node.data.key;
@@ -366,6 +427,7 @@ function populateNodeDropdowns(graph) {
         event.preventDefault();
         const node1 = node1Select.value;
         const node2 = node2Select.value;
+
         console.log("Connecting nodes:", node1, node2);
         createRelationshipBetweenNodes(node1, node2);
     };
