@@ -3,6 +3,7 @@ package com.knowledgegrapheditor.kge.web.api;
 import com.knowledgegrapheditor.kge.model.RelationshipDTO;
 import com.knowledgegrapheditor.kge.repository.ArbitraryNodeRepository;
 import com.knowledgegrapheditor.kge.repository.ArbitraryRelationshipRepository;
+import com.knowledgegrapheditor.kge.service.RelationshipService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,13 +15,12 @@ import java.util.UUID;
 @RequestMapping("/api/relationships")
 public class RelationshipApiController {
 
-    private final ArbitraryRelationshipRepository relationshipRepository;
-    private final ArbitraryNodeRepository nodeRepository;
+    private final RelationshipService relationshipService;
 
-    public RelationshipApiController(ArbitraryRelationshipRepository relationshipRepository, ArbitraryNodeRepository nodeRepository) {
-        this.relationshipRepository = relationshipRepository;
-        this.nodeRepository = nodeRepository;
+    public RelationshipApiController(RelationshipService relationshipService) {
+        this.relationshipService = relationshipService;
     }
+
 
     @PostMapping("/create")
     public ResponseEntity<RelationshipDTO> createRelationship(@RequestBody RelationshipDTO request) {
@@ -28,7 +28,7 @@ public class RelationshipApiController {
         UUID sourceId = UUID.fromString(request.getStartNodeId());
         UUID destinationId = UUID.fromString(request.getDestinationNodeId());
 
-        RelationshipDTO relationship = relationshipRepository.create(
+        RelationshipDTO relationship = relationshipService.create(
                 sourceId, // may me useless information
                 destinationId, // may be useless information
                 request.getRelationshipType(),
@@ -41,7 +41,7 @@ public class RelationshipApiController {
     @GetMapping("/search/{relationshipId}")
     public ResponseEntity<RelationshipDTO> searchRelationshipById(@PathVariable UUID relationshipId) {
 
-        Optional<RelationshipDTO> find = relationshipRepository.findById(relationshipId);
+        Optional<RelationshipDTO> find = relationshipService.findById(relationshipId);
 
         return find.map(ResponseEntity::ok).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
@@ -50,7 +50,7 @@ public class RelationshipApiController {
     public ResponseEntity<RelationshipDTO> searchRelationshipSrcDest(@RequestParam UUID sourceNodeId,
                                                                      @RequestParam UUID destinationNodeId) {
 
-        Optional<RelationshipDTO> find = relationshipRepository.findBySourceAndDestinationNodeId(sourceNodeId, destinationNodeId);
+        Optional<RelationshipDTO> find = relationshipService.findBySourceAndDestinationNodeId(sourceNodeId, destinationNodeId);
 
         return find.map(ResponseEntity::ok).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
@@ -60,7 +60,7 @@ public class RelationshipApiController {
                                                              @RequestParam UUID destinationNodeId) {
 
         try {
-            boolean relationship = relationshipRepository.deleteBySourceAndDestinationNodeId(
+            boolean relationship = relationshipService.deleteBySourceAndDestinationNodeId(
                     sourceNodeId,
                     destinationNodeId
             );
@@ -76,7 +76,7 @@ public class RelationshipApiController {
     public ResponseEntity<Boolean> removeRelationshipById(@PathVariable UUID relationshipId) {
 
         try {
-            boolean relationship = relationshipRepository.deleteById(
+            boolean relationship = relationshipService.deleteById(
                     relationshipId
             );
             return ResponseEntity.ok(relationship);
@@ -89,6 +89,6 @@ public class RelationshipApiController {
 
     @GetMapping
     public ResponseEntity<Iterable<RelationshipDTO>> findAll() {
-        return ResponseEntity.ok(relationshipRepository.findAll());
+        return ResponseEntity.ok(relationshipService.findAll());
     }
 }
