@@ -167,10 +167,12 @@ function showInfo(data, type) {
 }
 
 function showLabelForNode(sidebar, data, props) {
-    sidebar.querySelector(".display-class").textContent = " " + data.label || "Unnamed Node";
+    sidebar.querySelector(".display-class").textContent = data.label || "Unnamed Node";
+    sidebar.querySelector("#label").style.backgroundColor = labelColorMap[data.label].fill;
     const display_name = sidebar.querySelector(".display-name");
     display_name.innerHTML = " → ";
-    display_name.innerHTML += props.displayName;
+    display_name.innerHTML += props.displayName
+    ;
 }
 
 function showLabelForRelationship(sidebar, data) {
