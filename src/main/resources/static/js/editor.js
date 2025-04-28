@@ -167,7 +167,7 @@ function showInfo(data, type) {
 }
 
 function showLabelForNode(sidebar, data, props) {
-    sidebar.querySelector(".display-class").textContent = " of label " + data.label || "Unnamed Node";
+    sidebar.querySelector(".display-class").textContent = " " + data.label || "Unnamed Node";
     const display_name = sidebar.querySelector(".display-name");
     display_name.innerHTML = " → ";
     display_name.innerHTML += props.displayName;
