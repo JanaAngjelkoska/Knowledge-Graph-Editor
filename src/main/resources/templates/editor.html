@@ -24,7 +24,7 @@
                 <i class="bi bi-arrow-clockwise"></i> Reload
             </a>
             <i class="bi bi-database-exclamation" style="color: #b20000; font-size: 17px;"></i>
-            Please launch the <a href="https://neo4j.com/download/" target="_blank">Neo4j</a> DBMS server, failed to connect to GDB
+            Please launch the <a href="https://neo4j.com/download/" target="_blank">Neo4j</a> DBMS server, <span class="text-danger" style="font-weight: bolder">failed to connect</span> to GDB
             <span th:text="${connectionData.getSessionConfig().database().get()}" class="fw-bold"></span>
         </span>
 

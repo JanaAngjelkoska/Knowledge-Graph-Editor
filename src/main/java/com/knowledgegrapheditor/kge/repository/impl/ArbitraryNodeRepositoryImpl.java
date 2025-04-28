@@ -127,6 +127,7 @@ public class ArbitraryNodeRepositoryImpl implements ArbitraryNodeRepository {
 
     }
 
+    // used for adding and updating existing properties
     @Override
     public Optional<NodeDTO> updateProperties(UUID _id, String key, Object value) {
         if (findById(_id).isEmpty()) {

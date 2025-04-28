@@ -31,6 +31,7 @@ function colorForLabel(label) {
 
 // END UI SETUP
 
+
 function graphProps(graph) {
     graph.nodeTemplate =
         $(go.Node, "Auto",
@@ -111,7 +112,9 @@ async function linkGraphToBackend(graph) {
         from: edge.startNodeId,
         to: edge.destinationNodeId,
         text: edge.relationshipType,
-        id: edge.properties.id
+        startId: edge.properties.startNodeId,
+        endId: edge.properties.endId,
+        properties: edge.properties
     }));
 
     graph.model = new go.GraphLinksModel(nodeDataArray, linkDataArray);
@@ -170,7 +173,7 @@ function showLabelForNode(sidebar, data, props) {
     display_name.innerHTML += props.displayName;
 }
 
-function showLabelForRelationship(sidebar, data, props) {
+function showLabelForRelationship(sidebar, data) {
     sidebar.querySelector(".display-class").textContent = "(relationship type)"
     const display_name = sidebar.querySelector(".display-name");
     display_name.innerHTML = " → ";
@@ -183,12 +186,17 @@ function showPropertiesForAllTypes(sidebar, data, props, type) {
     propertiesList.innerHTML = "";
 
     editedProperties = {};
-    currentEditingEntity = data.id ?? data.properties?.id ?? null;
+    if (type === "Node")
+        currentEditingEntity = data.id ?? data.properties?.id ?? null;
+    else
+        currentEditingEntity = data
+
+    console.log("CURRENT EDITING ENTITY: ", currentEditingEntity)
 
     const keys = Object.keys(props);
     keys.forEach(key => {
-        if (key !== 'id') {
-            const li = createPropertyInput(key, props[key]);
+        if (key !== 'id' && key !== 'destinationNodeId' && key !== 'sourceNodeId') {
+            const li = createPropertyInput(key, props[key], data, type);
             propertiesList.appendChild(li);
         }
     });
@@ -211,13 +219,13 @@ function showPropertiesForAllTypes(sidebar, data, props, type) {
 
     const addNewIcon = liAddNew.querySelector('span');
     addNewIcon.addEventListener('click', () => {
-        const newLi = createPropertyInput("", "");
+        const newLi = createPropertyInput("", "", data, type);
         propertiesList.insertBefore(newLi, liAddNew);
     });
 }
 
 
-function createPropertyInput(key, value) {
+function createPropertyInput(key, value, data, type) {
     const li = document.createElement("li");
     if (key !== 'displayName') {
         li.innerHTML = `  
@@ -228,6 +236,14 @@ function createPropertyInput(key, value) {
             <i class="bi bi-trash"></i>
         </span>
     `;
+
+        const keyInput = li.querySelector('.key-input');
+        const deleteBtn = li.querySelector('.delete-btn');
+
+        deleteBtn.addEventListener('click', async () => {
+            await deleteNodeProperty(currentEditingEntity, keyInput.value.trim(), type);
+            li.remove();
+        });
     } else {
         li.innerHTML = `  
         <input type="text" style="width:40%" value="${key}" disabled placeholder="Key" class="d-inline-block form-control key-input form-control-sm" />
@@ -236,30 +252,31 @@ function createPropertyInput(key, value) {
         `;
     }
 
-    if (key !== 'displayName') {
-        const keyInput = li.querySelector('.key-input');
-        const deleteBtn = li.querySelector('.delete-btn');
-
-        deleteBtn.addEventListener('click', async () => {
-            await deleteNodeProperty(currentEditingEntity, keyInput.value.trim());
-            li.remove();
-        });
-    }
-
-
     return li;
 }
 
 
-async function deleteNodeProperty(nodeId, propertyKey) {
+
+async function deleteNodeProperty(entity, propertyKey, type) {
+    console.log(entity, propertyKey, type);
+    let link = null;
+
+    if (type === "Node") {
+        link = `/api/nodes/delete-property/${entity}/${propertyKey}`;
+    } else if (type === "Relationship") {
+        link = `/api/relationships/delete-property/${entity.from}/${entity.to}/${propertyKey}`;
+    }
+
+    console.log("LINK: ", link);
+
     try {
-        const response = await fetch(`/api/nodes/delete-property/${nodeId}/${propertyKey}`, {
+        const response = await fetch(link, {
             method: 'DELETE'
         });
 
         if (response.ok) {
-            console.log(`Property '${propertyKey}' deleted successfully from node ${nodeId}.`);
-            await linkGraphToBackend(graph); // Reload the graph or update the node data
+            console.log(`Property '${propertyKey}' deleted successfully.`);
+            await linkGraphToBackend(graph); // Reload the graph
         } else {
             console.error(`Failed to delete property '${propertyKey}':`, await response.text());
         }
@@ -269,6 +286,7 @@ async function deleteNodeProperty(nodeId, propertyKey) {
 }
 
 async function handleEditProperty(type) {
+    console.log(currentEditingEntity)
     if (!currentEditingEntity) {
         console.log("No entity selected for editing.");
         return;
@@ -297,28 +315,40 @@ async function handleEditProperty(type) {
     console.log("Saving changes for node:", currentEditingEntity);
     console.log("Properties to save:", updatedProperties);
 
-    if (type === "Node") {
-        console.log("SENDING REQUEST")
-        try {
-            const response = await fetch(`api/nodes/edit/${currentEditingEntity}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(updatedProperties)
-            });
-
-            if (response.ok) {
-                console.log("Properties updated successfully.");
-                await linkGraphToBackend(graph);
-            } else {
-                console.error("Failed to update properties:", await response.text());
-            }
-        } catch (error) {
-            console.error("Error occurred while updating properties:", error);
-        }
-    }
+    await callEditEntityProperties(currentEditingEntity, updatedProperties, type)
 }
+
+
+async function callEditEntityProperties(currentEditingEntity, updatedProperties, type) {
+    let link_call = null
+    if (type === "Node")
+        link_call = `api/nodes/edit/${currentEditingEntity}`
+    else
+        link_call = `api/relationships/edit/${currentEditingEntity.from}/${currentEditingEntity.to}`
+
+    try {
+        const response = await fetch(link_call, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedProperties)
+        });
+
+        if (response.ok) {
+            console.log("Properties updated successfully.");
+            await linkGraphToBackend(graph);
+
+
+        } else {
+            console.error("Failed to update properties:", await response.text());
+        }
+    } catch (error) {
+        console.error("Error occurred while updating properties:", error);
+    }
+
+}
+
 
 document.addEventListener("DOMContentLoaded", load_graph);
 
@@ -371,7 +401,6 @@ document.getElementById("createRelationshipBtn").addEventListener("click", async
         }
     });
 
-    // Check if the required fields are filled in
     if (fromNodeId && toNodeId && relationshipType && Object.keys(properties).length >= 0) {
         try {
             const postData = {
@@ -448,21 +477,6 @@ document.addEventListener('keydown', async function (event) {
         await deleteEntity();  // Call the deleteEntity function to delete the selected entity
     }
 });
-
-// graph.addDiagramListener("ObjectSingleClicked", function (e) {
-//     const part = e.subject.part;
-//
-//     if (!(part instanceof go.Node || part instanceof go.Link)) return;
-//
-//     if (part instanceof go.Node) {
-//         currentEntityType = "Node";
-//         showInfo(part.data, "Node");
-//     } else if (part instanceof go.Link) {
-//         currentEntityType = "Relationship";
-//         showInfo(part.data, "Relationship");
-//     }
-// });
-
 
 deleteButton.addEventListener('click', deleteEntity)
 

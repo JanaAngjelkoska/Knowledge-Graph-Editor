@@ -2,8 +2,6 @@ package com.knowledgegrapheditor.kge.web.api;
 
 import com.knowledgegrapheditor.kge.model.NodeDTO;
 import com.knowledgegrapheditor.kge.model.RelationshipDTO;
-import com.knowledgegrapheditor.kge.repository.ArbitraryNodeRepository;
-import com.knowledgegrapheditor.kge.repository.ArbitraryRelationshipRepository;
 import com.knowledgegrapheditor.kge.service.RelationshipService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -93,18 +91,27 @@ public class RelationshipApiController {
         return ResponseEntity.ok(relationshipService.findAll());
     }
 
-//    @PatchMapping("/edit/{id}")
-//    public ResponseEntity<List<NodeDTO>> editNode(@PathVariable("id") UUID id, @RequestBody Map<String, Object> request) {
-//        List<NodeDTO> list = new ArrayList<>();
-//
-//        System.out.println(request.toString()); // debug
-//
-//        for (Map.Entry<String, Object> entry : request.entrySet()) {
-//            Optional<NodeDTO> node = relationshipService.modifyLabelOf(id, entry.getKey(), entry.getValue());
-//            list.add(node.get());
-//        }
-//
-//        return ResponseEntity.ok(list);
-//    }
+    @PatchMapping("/edit/{startId}/{endId}")
+    public ResponseEntity<List<RelationshipDTO>> editProperties(@PathVariable("startId") UUID startNodeId,
+                                                                @PathVariable("endId") UUID endNodeId,
+                                                                @RequestBody Map<String, Object> request) {
+        List<RelationshipDTO> list = new ArrayList<>();
+        for (Map.Entry<String, Object> entry : request.entrySet()) {
+            Optional<RelationshipDTO> relationship = relationshipService.updateProperty(startNodeId, endNodeId, entry.getKey(), entry.getValue());
+            list.add(relationship.get());
+        }
+
+        return ResponseEntity.ok(list);
+    }
+
+
+    @RequestMapping(value = "/delete-property/{startId}/{endId}/{propertyKey}", method = RequestMethod.DELETE)
+    public ResponseEntity<Void> deleteProperty(@PathVariable UUID startId,
+                                               @PathVariable UUID endId,
+                                               @PathVariable String propertyKey) {
+        Optional<RelationshipDTO> result = relationshipService.removeProperty(startId, endId, propertyKey);
+        return result.isPresent() ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
 }
 

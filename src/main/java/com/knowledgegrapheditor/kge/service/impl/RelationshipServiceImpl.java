@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
 @Service
 public class RelationshipServiceImpl implements RelationshipService {
 
@@ -51,4 +52,16 @@ public class RelationshipServiceImpl implements RelationshipService {
     public boolean deleteById(UUID relationshipId) {
         return relationshipRepository.deleteById(relationshipId);
     }
+
+    @Override
+    public Optional<RelationshipDTO> updateProperty(UUID startId, UUID endId, String key, Object value) {
+        return relationshipRepository.editProperty(startId, endId, key, value);
+    }
+
+    @Override
+    public Optional<RelationshipDTO> removeProperty(UUID startId, UUID endId, String key) {
+        return relationshipRepository.deleteProperty(startId, endId, key);
+    }
+
+
 }

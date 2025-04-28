@@ -14,5 +14,7 @@ public interface RelationshipService {
     Optional<RelationshipDTO> modifyLabelOf(UUID sourceNodeId, UUID destinationNodeId, String newLabel);
     boolean deleteBySourceAndDestinationNodeId(UUID sourceId, UUID destinationId);
     boolean deleteById(UUID relationshipId);
+    Optional<RelationshipDTO> updateProperty(UUID startId, UUID endId, String key, Object value);
+    Optional<RelationshipDTO> removeProperty(UUID startId, UUID endId, String key);
 
 }

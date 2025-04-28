@@ -15,4 +15,8 @@ public interface ArbitraryRelationshipRepository {
     Optional<RelationshipDTO> modifyLabelOf(UUID sourceNodeId, UUID destinationNodeId, String newLabel);
     boolean deleteBySourceAndDestinationNodeId(UUID sourceId, UUID destinationId);
     boolean deleteById(UUID relationshipId);
+    Optional<RelationshipDTO> editProperty(UUID startId, UUID endId, String key, Object updatedValue);
+    Optional<RelationshipDTO> deleteProperty(UUID startId, UUID endId, String key);
+
+
 }
