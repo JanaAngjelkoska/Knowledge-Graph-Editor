@@ -32,7 +32,7 @@ public class RelationshipApiController {
                 startNodeId,
                 endNodeId,
                 request.getRelationshipType(),  // use the request's relationship type
-                new HashMap<>()
+                request.getProperties()
         );
 
         return new ResponseEntity<>(relationship, HttpStatus.CREATED);

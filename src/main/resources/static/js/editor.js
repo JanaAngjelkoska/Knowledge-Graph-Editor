@@ -7,21 +7,48 @@ const deleteButton = document.getElementById('delete-btn');
 let graph;
 let editedProperties = {};
 let currentEditingEntity = null;
-const connect_nodes_button = document.querySelector('.connect-nodes')
+const connect_nodes_button = document.querySelector('#createRelationshipBtn')
+const labelColorMap = {}; // stores assigned colors
 
+
+function randomColor() {
+    const hue = Math.floor(Math.random() * 360);
+    const saturation = Math.floor(Math.random() * 40) + 30;
+    const lightness = Math.floor(Math.random() * 30) + 60;
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+}
+
+function colorForLabel(label) {
+    if (!labelColorMap[label]) {
+        labelColorMap[label] = {
+            fill: randomColor(),
+            stroke: randomColor()
+        };
+    }
+
+    return labelColorMap[label];
+}
+
+// END UI SETUP
 
 function graphProps(graph) {
     graph.nodeTemplate =
         $(go.Node, "Auto",
-            $(go.Shape, "Circle", {
-                fill: "#d4ecff",
-                stroke: "#17496e",
-                strokeWidth: 2,
-                width: 100,
-                height: 100
-            }),
+            $(go.Shape, "Circle",
+                {
+                    strokeWidth: 2,
+                    width: 80,
+                    height: 80
+                },
+                new go.Binding("fill", "label", function (label) {
+                    return colorForLabel(label).fill;
+                }),
+                new go.Binding("stroke", "label", function (label) {
+                    return `#000`
+                })
+            ),
             $(go.TextBlock, {
-                    font: "light 12px Montserrat",
+                    font: "light 14px Montserrat",
                     textAlign: "center",
                     stroke: "black",
                     wrap: go.TextBlock.WrapFit,
@@ -41,17 +68,17 @@ function graphProps(graph) {
                 relinkableFrom: true,
                 relinkableTo: true
             },
-            $(go.Shape, {strokeWidth: 2, stroke: "#1b5970"}),
-            $(go.Shape, {toArrow: "Standard", stroke: null, fill: "#1b5970"}),
+            $(go.Shape, {strokeWidth: 2, stroke: "#000"}),
+            $(go.Shape, {toArrow: "Standard", stroke: null, fill: "#000"}),
             $(go.Panel, "Auto",
                 $(go.Shape, "RoundedRectangle", {
-                    fill: "#1b5970",
+                    fill: "#000",
                     strokeWidth: 0
                 }),
                 $(go.TextBlock,
                     {
-                        margin: new go.Margin(4, 6),
-                        font: "bold 10px Montserrat",
+                        margin: new go.Margin(1, 2),
+                        font: "light 14px Montserrat",
                         stroke: "white",
                         editable: true,
                         wrap: go.TextBlock.WrapFit,
@@ -84,7 +111,7 @@ async function linkGraphToBackend(graph) {
         from: edge.startNodeId,
         to: edge.destinationNodeId,
         text: edge.relationshipType,
-        id : edge.properties.id
+        id: edge.properties.id
     }));
 
     graph.model = new go.GraphLinksModel(nodeDataArray, linkDataArray);
@@ -144,7 +171,7 @@ function showLabelForNode(sidebar, data, props) {
 }
 
 function showLabelForRelationship(sidebar, data, props) {
-    sidebar.querySelector(".display-class").textContent = "(relationship label)"
+    sidebar.querySelector(".display-class").textContent = "(relationship type)"
     const display_name = sidebar.querySelector(".display-name");
     display_name.innerHTML = " → ";
     display_name.innerHTML += data.text;
@@ -160,14 +187,16 @@ function showPropertiesForAllTypes(sidebar, data, props, type) {
 
     const keys = Object.keys(props);
     keys.forEach(key => {
-        if (key !== 'id' && key !== 'displayName') {
+        if (key !== 'id') {
             const li = createPropertyInput(key, props[key]);
             propertiesList.appendChild(li);
         }
     });
 
     const saveChangesButton = document.querySelector(".save-changes-button");
-    saveChangesButton.onclick = function() { handleEditProperty(type); };
+    saveChangesButton.onclick = function () {
+        handleEditProperty(type);
+    };
 
     console.log(type)
 
@@ -190,7 +219,8 @@ function showPropertiesForAllTypes(sidebar, data, props, type) {
 
 function createPropertyInput(key, value) {
     const li = document.createElement("li");
-    li.innerHTML = `  
+    if (key !== 'displayName') {
+        li.innerHTML = `  
         <input type="text" style="width:40%" value="${key}" placeholder="Key" class="d-inline-block form-control key-input form-control-sm" />
         <span class="d-inline-block text-center" style="width: 5%;">→</span>
         <input type="text" style="width: 40%" value="${value}" placeholder="Value" class="d-inline-block form-control value-input form-control-sm"/>
@@ -198,14 +228,24 @@ function createPropertyInput(key, value) {
             <i class="bi bi-trash"></i>
         </span>
     `;
+    } else {
+        li.innerHTML = `  
+        <input type="text" style="width:40%" value="${key}" disabled placeholder="Key" class="d-inline-block form-control key-input form-control-sm" />
+        <span class="d-inline-block text-center" style="width: 5%;">→</span>
+        <input type="text" style="width: 40%" value="${value}" placeholder="Value" class="d-inline-block form-control value-input form-control-sm"/>
+        `;
+    }
 
-    const keyInput = li.querySelector('.key-input');
-    const deleteBtn = li.querySelector('.delete-btn');
+    if (key !== 'displayName') {
+        const keyInput = li.querySelector('.key-input');
+        const deleteBtn = li.querySelector('.delete-btn');
 
-    deleteBtn.addEventListener('click', async () => {
-        await deleteNodeProperty(currentEditingEntity, keyInput.value.trim());
-        li.remove();
-    });
+        deleteBtn.addEventListener('click', async () => {
+            await deleteNodeProperty(currentEditingEntity, keyInput.value.trim());
+            li.remove();
+        });
+    }
+
 
     return li;
 }
@@ -317,6 +357,70 @@ document.getElementById("createNodeBtn").addEventListener("click", async () => {
     }
 });
 
+document.getElementById("createRelationshipBtn").addEventListener("click", async () => {
+    const fromNodeId = document.getElementById("node1").value.trim();
+    const toNodeId = document.getElementById("node2").value.trim();
+    const relationshipType = document.getElementById("relationshipType").value.trim();
+    const properties = {};
+
+    document.querySelectorAll("#relationshipPropertyList li").forEach(li => {
+        const key = li.querySelector(".relationship-property-key")?.value.trim();
+        const value = li.querySelector(".relationship-property-value")?.value.trim();
+        if (key && value) {
+            properties[key] = value;
+        }
+    });
+
+    // Check if the required fields are filled in
+    if (fromNodeId && toNodeId && relationshipType && Object.keys(properties).length >= 0) {
+        try {
+            const postData = {
+                startNodeId: fromNodeId,
+                endNodeId: toNodeId,
+                relationshipType: relationshipType.toString(),
+                properties: properties
+            };
+
+            await makePostJsonBody(postData, `api/relationships/create/${fromNodeId}/${toNodeId}`);
+
+            await linkGraphToBackend(graph);
+
+
+        } catch (error) {
+            console.error('Error during relationship creation:', error);
+        }
+    } else {
+        alert("Please fill in all fields and at least one property.");
+    }
+});
+
+
+document.querySelector("#addRelationshipPropertyBtn").addEventListener("click", () => {
+    const newLi = document.createElement("li");
+    newLi.classList.add("d-flex", "gap-2", "mb-2");
+
+    newLi.innerHTML = `
+        <div class="mb-3">
+            <label class="form-label">Key</label>
+            <input type="text" class="relationship-property-key form-control" placeholder="Enter property key" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Value</label>
+            <input type="text" class="relationship-property-value form-control" placeholder="Enter property value" />
+        </div>
+        <span>
+            <i class="bi bi-trash mx-1 delete-property-btn" style="cursor: pointer; color: dimgray; font-size: 1.3rem;"></i>
+        </span>
+    `;
+
+    document.getElementById("relationshipPropertyList").appendChild(newLi);
+
+    newLi.querySelector(".delete-property-btn").addEventListener("click", () => {
+        newLi.remove();
+    });
+});
+
+
 document.querySelector(".add-property-btn").addEventListener("click", () => {
     const newLi = document.createElement("li");
     newLi.innerHTML = `
@@ -339,6 +443,11 @@ document.querySelector(".add-property-btn").addEventListener("click", () => {
     });
 });
 
+document.addEventListener('keydown', async function (event) {
+    if (event.key === 'Backspace' || event.key === 'Delete') {
+        await deleteEntity();  // Call the deleteEntity function to delete the selected entity
+    }
+});
 
 // graph.addDiagramListener("ObjectSingleClicked", function (e) {
 //     const part = e.subject.part;
@@ -422,46 +531,5 @@ function populateNodeDropdowns(graph) {
             node2Select.appendChild(option2);
         }
     });
-
-    form.onsubmit = function (event) {
-        event.preventDefault();
-        const node1 = node1Select.value;
-        const node2 = node2Select.value;
-
-        console.log("Connecting nodes:", node1, node2);
-        createRelationshipBetweenNodes(node1, node2);
-    };
 }
 
-async function createRelationshipBetweenNodes(startNodeId, endNodeId) {
-    try {
-        const relationshipType = "any";
-
-        const bodyData = {
-            startNodeId: startNodeId,
-            destinationNodeId: endNodeId,
-            relationshipType: relationshipType,
-            properties: {}
-        };
-
-        const response = await fetch(`/api/relationships/create/${startNodeId}/${endNodeId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(bodyData)
-        });
-
-        if (response.ok) {
-            console.log(`Relationship created successfully.`);
-            await linkGraphToBackend(graph);
-        } else {
-            console.error(`Failed to create relationship:`, await response.text());
-        }
-    } catch (error) {
-        console.error("Error occurred while creating relationship:", error);
-    }
-}
-
-
-// function createRelationship()
