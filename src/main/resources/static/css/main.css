@@ -32,14 +32,6 @@
     font-style: italic;
 }
 
-.addbg {
-    background-image: url("../img/land.png");
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position-x: -100px;
-    height: 100vh;
-}
-
 .custom-bg-col {
     background: #F9FBFD;
 }

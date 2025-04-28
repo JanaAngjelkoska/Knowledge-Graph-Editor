@@ -10,9 +10,9 @@
 
 </head>
 <body class="m-0 p-0 w-100">
-<div class="container-fluid w-100 p-0 custom-bg-col">
+<div class="container-fluid vh-100 w-100 p-0 custom-bg-col">
 
-    <div class="row flex-column justify-content-centercontainer-fluid mx-auto p-0 w-100 addbg">
+    <div class="row flex-column justify-content-center align-items-center container-fluid mb-5 mx-auto p-0 w-100">
         <nav class="navbar w-75 bg-transparent mx-auto">
             <a class="navbar-brand d-flex align-items-center" href="#">
                 <img src="./img/logo.png" alt="Logo" width="40" height="40"
@@ -31,22 +31,26 @@
             </a>
         </nav>
 
-        <div class="d-flex align-items-center">
-            <div class="w-75 h-50 mx-auto">
-                <h1 class="fw-light display-4 w-50 text-capitalize fade-in givefont">
+        <div class="row w-75 mt-5 mx-auto align-items-center">
+            <div class="col-6 text-center text-md-start">
+                <h1 class="fw-light display-4 text-capitalize fade-in givefont">
                     Knowledge graph editor, a web platform
                 </h1>
-                <h2 class="display-5 w-75 text-lowercase fade-in givefont">
+                <h2 class="display-5 text-lowercase fade-in givefont">
                     For editing <b class="text-shadow">knowledge graphs</b>.
                 </h2>
-
                 <a href="/editor" target="_blank"
                    class="px-4 py-3 fs-3 mt-5 btn bg-transparent fade-in-slower border-primary shadow border-2 hover givegradient givefont">
                     <i class="bi bi-tools"></i>
                     Open Editor
                 </a>
             </div>
+
+            <div class="col-6 text-center">
+                <img src="./img/land.png" alt="a knowledge graph" width="1200" class="img-fluid">
+            </div>
         </div>
+
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
