@@ -70,3 +70,20 @@ html, body {
     border-radius: 12px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
 }
+
+/*========= anim ==========*/
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.pulse {
+    animation: pulse 2s infinite ease-in-out;
+}

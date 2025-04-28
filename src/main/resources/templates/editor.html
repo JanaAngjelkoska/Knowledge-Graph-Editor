@@ -10,11 +10,25 @@
 <body class="custom-bg-col">
 <div class="main-container givefont custom-bg-col container-fluid">
     <nav class="navbar w-100 px-5 bg-transparent mx-auto">
-        <a class="navbar-brand d-flex align-items-center" href="#">
+        <a class="navbar-brand d-flex align-items-center" href="/">
             <img src="./img/logo.png" alt="Logo" width="40" height="40" class="d-inline-block align-text-top">
             <span class="ms-2 givefont">Knowledge Graph Editor</span>
         </a>
-        <a href="/" class="btn btn-transparent border-primary border-1 py-1 px-3 shadow-sm">
+        <span th:if="${connectionData.connectionStatus()}">
+            <i class="bi bi-database-check" style="color: #61be00; font-size: 17px;"></i>
+            Connected to GDB <span th:text="${connectionData.getSessionConfig().database().get()}"
+                                   class="fw-bold"></span>
+        </span>
+        <span class="pulse" th:if="${!connectionData.connectionStatus()}">
+            <a href="/editor" class="me-2 btn text-dark btn-outline-primary btn-sm ms-2">
+                <i class="bi bi-arrow-clockwise"></i> Reload
+            </a>
+            <i class="bi bi-database-exclamation" style="color: #b20000; font-size: 17px;"></i>
+            Please launch the <a href="https://neo4j.com/download/" target="_blank">Neo4j</a> DBMS server, failed to connect to GDB
+            <span th:text="${connectionData.getSessionConfig().database().get()}" class="fw-bold"></span>
+        </span>
+
+        <a href="/" class="btn btn-outline-primary border-primary text-dark py-1 px-3 shadow-sm">
             <i class="bi bi-arrow-return-left"></i> Back
         </a>
     </nav>
