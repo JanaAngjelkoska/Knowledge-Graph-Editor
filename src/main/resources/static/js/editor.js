@@ -132,7 +132,7 @@ function load_graph() {
         layout: $(go.ForceDirectedLayout, {
             defaultSpringLength: 2E2,
             defaultElectricalCharge: 3E2,
-            maxIterations: 2E3
+            maxIterations: 5E3
         })
     });
 
@@ -472,11 +472,6 @@ document.querySelector(".add-property-btn").addEventListener("click", () => {
     });
 });
 
-document.addEventListener('keydown', async function (event) {
-    if (event.key === 'Backspace' || event.key === 'Delete') {
-        await deleteEntity();  // Call the deleteEntity function to delete the selected entity
-    }
-});
 
 deleteButton.addEventListener('click', deleteEntity)
 
@@ -497,7 +492,7 @@ async function deleteEntity() {
 
 
     if (selectedEntity) {
-        const confirmation = confirm("Are you sure you want to delete the selected entity?");
+        const confirmation = confirm("Are you sure you want to delete the selected entity? This will cascade to all associated relationships.");
         if (confirmation) {
             try {
                 if (currentEntityType === "Node") {

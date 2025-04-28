@@ -34,7 +34,6 @@
 
 .side-bar {
     border-top: 2px solid rgba(0, 0, 0, 0.05);
-    box-shadow: 0 0 3px rgba(0, 0, 0, 10%);
 }
 
 html, body {
@@ -54,21 +53,22 @@ html, body {
 }
 
 .side-bar {
+    border: 1px solid #d6d9dc;
     height: 100%;
 }
 
 .toolbar {
-    background: #eff3ff;
-    border-bottom: 2px solid rgba(0, 0, 0, 0.05);
-    box-shadow: 0 0 3px rgba(0, 0, 0, 10%);
+    background: #f5f8ff;
+    border: 1px solid #d6d9dc;
+    box-shadow: 0 0 5px rgb(0, 0, 0, 0.1);
 }
 
-#myDiagramDiv {
+#graphDiv {
     flex-grow: 1;
     width: 100%;
     background-color: white;
     border-radius: 12px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
 }
 
 /*========= anim ==========*/
