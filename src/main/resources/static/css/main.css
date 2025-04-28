@@ -9,6 +9,18 @@
     font-style: normal;
 }
 
+.confirmation-message{
+    font-weight: bold;
+    font-size: 13px;
+    margin-top: 10px;
+}
+
+.confirmation-message-create, .confirmation-message-create-rel{
+    color: darkgreen;
+    font-size: 14px;
+    font-weight: bolder;
+}
+
 .givegradient {
     background: linear-gradient(to right, rgba(0, 255, 255, 0.05), rgba(0, 0, 255, 0.05));
     transition: background 0.3s ease; /* Smooth transition for the background */

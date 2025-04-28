@@ -9,7 +9,9 @@ let editedProperties = {};
 let currentEditingEntity = null;
 const connect_nodes_button = document.querySelector('#createRelationshipBtn')
 const labelColorMap = {}; // stores assigned colors
-
+let confirmation_message = document.querySelector('.confirmation-message')
+let confirmation_message_create_node = document.querySelector('.confirmation-message-create')
+let confirmation_message_create_rel = document.querySelector('.confirmation-message-create-rel')
 
 function randomColor() {
     const hue = Math.floor(Math.random() * 360);
@@ -143,7 +145,9 @@ function load_graph() {
         const part = e.subject.part;
 
         if (!(part instanceof go.Node || part instanceof go.Link)) return;
-
+        confirmation_message.innerHTML = ""
+        confirmation_message_create_rel = ""
+        confirmation_message_create_node = ""
         if (part instanceof go.Node) {
             showInfo(part.data, "Node");
         } else if (part instanceof go.Link) {
@@ -321,7 +325,6 @@ async function handleEditProperty(type) {
     await callEditEntityProperties(currentEditingEntity, updatedProperties, type)
 }
 
-
 async function callEditEntityProperties(currentEditingEntity, updatedProperties, type) {
     let link_call = null
     if (type === "Node")
@@ -340,11 +343,13 @@ async function callEditEntityProperties(currentEditingEntity, updatedProperties,
 
         if (response.ok) {
             console.log("Properties updated successfully.");
+            confirmation_message.innerHTML = "Property saved successfully."
             await linkGraphToBackend(graph);
 
 
         } else {
             console.error("Failed to update properties:", await response.text());
+
         }
     } catch (error) {
         console.error("Error occurred while updating properties:", error);
@@ -378,9 +383,10 @@ document.getElementById("createNodeBtn").addEventListener("click", async () => {
             };
 
             const response = await makePostJsonBody(postData, "api/nodes/create");
-
+            confirmation_message_create_node.innerHTML = "Node created."
             console.log(response);
             await linkGraphToBackend(graph);
+
 
         } catch (error) {
             console.error('Error during node creation:', error);
@@ -389,7 +395,6 @@ document.getElementById("createNodeBtn").addEventListener("click", async () => {
         alert("Please enter a label and at least one property.");
     }
 });
-
 document.getElementById("createRelationshipBtn").addEventListener("click", async () => {
     const fromNodeId = document.getElementById("node1").value.trim();
     const toNodeId = document.getElementById("node2").value.trim();
@@ -414,8 +419,9 @@ document.getElementById("createRelationshipBtn").addEventListener("click", async
             };
 
             await makePostJsonBody(postData, `api/relationships/create/${fromNodeId}/${toNodeId}`);
-
+            confirmation_message_create_rel.innerHTML = "Relationship created."
             await linkGraphToBackend(graph);
+
 
 
         } catch (error) {
