@@ -13,7 +13,7 @@ const labelColorMap = {}; // stores assigned colors
 
 function randomColor() {
     const hue = Math.floor(Math.random() * 360);
-    const saturation = Math.floor(Math.random() * 20) + 20;
+    const saturation = Math.floor(Math.random() * 10) + 30;
     const lightness = Math.floor(Math.random() * 20) + 70;
     return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 }
@@ -169,6 +169,7 @@ function showInfo(data, type) {
 function showLabelForNode(sidebar, data, props) {
     sidebar.querySelector(".display-class").textContent = data.label || "Unnamed Node";
     sidebar.querySelector("#label").style.backgroundColor = labelColorMap[data.label].fill;
+    sidebar.querySelector("#label").style.border = "1px solid gray";
     const display_name = sidebar.querySelector(".display-name");
     display_name.innerHTML = " → ";
     display_name.innerHTML += props.displayName
