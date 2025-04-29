@@ -10,9 +10,10 @@
 }
 
 .confirmation-message{
-    font-weight: bold;
-    font-size: 13px;
     margin-top: 10px;
+    color: darkgreen;
+    font-size: 14px;
+    font-weight: bolder;
 }
 
 .confirmation-message-create, .confirmation-message-create-rel{
@@ -49,9 +50,9 @@
     font-style: italic;
 }
 
-.custom-bg-col {
-    background:;
-}
+/*.custom-bg-col {*/
+/*    background:;*/
+/*}*/
 
 /* ============ anim ============ */
 

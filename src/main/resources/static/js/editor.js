@@ -9,6 +9,10 @@ let editedProperties = {};
 let currentEditingEntity = null;
 const labelColorMap = {};
 
+// confirmation messages
+let create_rel_msg = document.querySelector('.confirmation-message-create-rel')
+let save_changes_msg = document.querySelector('.confirmation-message')
+let create_node_msg = document.querySelector('.confirmation-message-create')
 
 function randomColor() {
     const hue = Math.floor(Math.random() * 360);
@@ -140,7 +144,9 @@ function load_graph() {
         const part = e.subject.part;
 
         if (!(part instanceof go.Node || part instanceof go.Link)) return;
-
+        create_node_msg.innerHTML = ""
+        create_rel_msg.innerHTML = ""
+        save_changes_msg.innerHTML = ""
         if (part instanceof go.Node) {
             showInfo(part.data, "Node");
         } else if (part instanceof go.Link) {
@@ -323,6 +329,7 @@ async function callEditEntityProperties(currentEditingEntity, updatedProperties,
 
     try {
         await makePatchJsonBody(updatedProperties, link_call)
+        save_changes_msg.innerHTML = "Changes saved."
         await linkGraphToBackend(graph);
     } catch (error) {
         console.error("Error occurred while updating properties: ", error);
@@ -415,7 +422,7 @@ document.getElementById("createNodeBtn").addEventListener("click", async () => {
             };
 
             await makePostJsonBody(postData, "api/nodes/create");
-
+            create_node_msg.innerHTML = "Node created."
             await linkGraphToBackend(graph);
 
         } catch (error) {
@@ -450,7 +457,7 @@ document.getElementById("createRelationshipBtn").addEventListener("click", async
             };
 
             await makePostJsonBody(postData, `api/relationships/create/${fromNodeId}/${toNodeId}`);
-
+            create_rel_msg.innerHTML = "Relationship created."
             await linkGraphToBackend(graph);
 
 
