@@ -39,11 +39,6 @@ public class RelationshipServiceImpl implements RelationshipService {
     }
 
     @Override
-    public Optional<RelationshipDTO> modifyLabelOf(UUID sourceNodeId, UUID destinationNodeId, String newLabel) {
-        return relationshipRepository.modifyLabelOf(sourceNodeId, destinationNodeId, newLabel);
-    }
-
-    @Override
     public boolean deleteBySourceAndDestinationNodeId(UUID sourceId, UUID destinationId) {
         return relationshipRepository.deleteBySourceAndDestinationNodeId(sourceId, destinationId);
     }
@@ -62,6 +57,5 @@ public class RelationshipServiceImpl implements RelationshipService {
     public Optional<RelationshipDTO> removeProperty(UUID startId, UUID endId, String key) {
         return relationshipRepository.deleteProperty(startId, endId, key);
     }
-
 
 }

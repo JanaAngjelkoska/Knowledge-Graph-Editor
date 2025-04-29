@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="./css/editor.css">
 </head>
 <body class="custom-bg-col">
+
+<!--main ui-->
 <div class="main-container givefont custom-bg-col container-fluid">
     <nav class="navbar w-100 px-5 bg-transparent mx-auto">
         <a class="navbar-brand d-flex align-items-center" href="/">
@@ -24,7 +26,8 @@
                 <i class="bi bi-arrow-clockwise"></i> Reload
             </a>
             <i class="bi bi-database-exclamation" style="color: #b20000; font-size: 17px;"></i>
-            Please launch the <a href="https://neo4j.com/download/" target="_blank">Neo4j</a> DBMS server, <span class="text-danger" style="font-weight: bolder">failed to connect</span> to GDB
+            Please launch the <a href="https://neo4j.com/download/" target="_blank">Neo4j</a> DBMS server, <span
+                class="text-danger" style="font-weight: bolder">failed to connect</span> to GDB
             <span th:text="${connectionData.getSessionConfig().database().get()}" class="fw-bold"></span>
         </span>
 
@@ -64,7 +67,10 @@
                     <div>
                         <span><i class="bi bi-eye me-1"></i>Display name</span>
                         <span class="display-name badge text-bg-dark" style="font-weight: bolder"></span>
-                        <span class="badge display-class p-1" id="label" style="font-size: 12px; font-weight: bolder; color: black; border-radius: 5px;"></span>
+                        <span class="badge display-class p-1" id="label"
+                              style="font-size: 12px; font-weight: bolder; color: black; border-radius: 5px;"></span>
+                        <span id="relTypeText"
+                              style="font-size: 12px; font-weight: bolder; color: black;"></span>
                         <span class="display-name-bin"></span>
                     </div>
 
@@ -88,7 +94,7 @@
         </div>
     </div>
 
-    <!-- Modal for Adding Node -->
+    <!-- add node modal -->
     <div class="modal fade" id="addNodeModal" tabindex="-1" aria-labelledby="addNodeModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -153,7 +159,6 @@
 
 
 <!-- add relationship modal -->
-
 <div class="modal fade givefont" id="addRelationshipModal" tabindex="-1" aria-labelledby="addRelationshipModalLabel"
      aria-hidden="true">
     <div class="modal-dialog">

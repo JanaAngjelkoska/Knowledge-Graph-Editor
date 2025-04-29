@@ -57,12 +57,10 @@ public class NodeApiController {
         return ResponseEntity.ok(list);
     }
 
-
     @GetMapping
     public ResponseEntity<Iterable<NodeDTO>> getAllNodes() {
         return ResponseEntity.ok(nodeService.findAll());
     }
-
 
     @RequestMapping(value = "/delete-property/{id}/{propertyKey}", method = RequestMethod.DELETE)
     public ResponseEntity<Void> deleteProperty(@PathVariable UUID id, @PathVariable String propertyKey) {

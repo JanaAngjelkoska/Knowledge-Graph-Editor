@@ -19,11 +19,6 @@ public class NodeServiceImpl implements NodeService {
     }
 
     @Override
-    public Iterable<NodeDTO> findAllByLabel(String label) {
-        return nodeRepository.findAllByLabel(label);
-    }
-
-    @Override
     public Iterable<NodeDTO> findAll() {
         return nodeRepository.findAll();
     }
@@ -52,9 +47,5 @@ public class NodeServiceImpl implements NodeService {
     public Optional<NodeDTO> deleteProperty(UUID id, String propertyKey) {
         return nodeRepository.deleteProperty(id, propertyKey);
     }
-
-
-
-
 
 }
