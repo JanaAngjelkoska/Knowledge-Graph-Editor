@@ -69,7 +69,7 @@ function graphProps(graph) {
                 relinkableFrom: true,
                 relinkableTo: true
             },
-            $(go.Shape, {strokeWidth: 2, stroke: "#000"}),
+            $(go.Shape, {strokeWidth: 3, stroke: "#000"}),
             $(go.Shape, {toArrow: "Standard", stroke: null, fill: "#000"}),
             $(go.Panel, "Auto",
                 $(go.Shape, "RoundedRectangle", {
