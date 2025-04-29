@@ -77,7 +77,7 @@ function graphProps(graph) {
                         margin: new go.Margin(1, 2),
                         font: "light 14px Montserrat",
                         stroke: "white",
-                        editable: true,
+                        editable: false,
                         wrap: go.TextBlock.WrapFit,
                         overflow: go.TextBlock.OverflowEllipsis
                     },
