@@ -1,7 +1,5 @@
 package com.knowledgegrapheditor.kge.model;
 
-import org.w3c.dom.Node;
-
 import java.util.Map;
 
 public class NodeDTO {

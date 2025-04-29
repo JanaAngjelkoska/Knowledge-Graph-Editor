@@ -1,6 +1,5 @@
 package com.knowledgegrapheditor.kge.web.api;
 
-import com.knowledgegrapheditor.kge.model.NodeDTO;
 import com.knowledgegrapheditor.kge.model.RelationshipDTO;
 import com.knowledgegrapheditor.kge.service.RelationshipService;
 import org.springframework.http.HttpStatus;
@@ -19,7 +18,6 @@ public class RelationshipApiController {
         this.relationshipService = relationshipService;
     }
 
-
     @PostMapping("/create/{startNodeId}/{endNodeId}")
     public ResponseEntity<RelationshipDTO> createRelationship(
             @PathVariable UUID startNodeId,
@@ -35,7 +33,6 @@ public class RelationshipApiController {
 
         return new ResponseEntity<>(relationship, HttpStatus.CREATED);
     }
-
 
     @GetMapping("/search/{relationshipId}")
     public ResponseEntity<RelationshipDTO> searchRelationshipById(@PathVariable UUID relationshipId) {
@@ -104,8 +101,7 @@ public class RelationshipApiController {
         return ResponseEntity.ok(list);
     }
 
-
-    @RequestMapping(value = "/delete-property/{startId}/{endId}/{propertyKey}", method = RequestMethod.DELETE)
+    @DeleteMapping("/delete-property/{startId}/{endId}/{propertyKey}")
     public ResponseEntity<Void> deleteProperty(@PathVariable UUID startId,
                                                @PathVariable UUID endId,
                                                @PathVariable String propertyKey) {

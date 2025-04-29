@@ -1,10 +1,7 @@
 package com.knowledgegrapheditor.kge.util;
 
-import com.knowledgegrapheditor.kge.model.NodeDTO;
 import com.knowledgegrapheditor.kge.model.RelationshipDTO;
 import org.neo4j.driver.Record;
-
-import java.util.UUID;
 
 public class RelationshipSerializer {
 

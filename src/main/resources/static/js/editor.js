@@ -1,17 +1,14 @@
-import {makeGet, makePostJsonBody, makePostPathVar} from './requests.js';
+import {makeGet, makePatchJsonBody, makePostJsonBody, makePostPathVar} from './requests.js';
 
+// -----------------| UI SETUP & GLOBAL VAR SETUP |-----------------
 
-// UI SETUP
 const $ = go.GraphObject.make;
 const deleteButton = document.getElementById('delete-btn');
 let graph;
 let editedProperties = {};
 let currentEditingEntity = null;
-const connect_nodes_button = document.querySelector('#createRelationshipBtn')
-const labelColorMap = {}; // stores assigned colors
-let confirmation_message = document.querySelector('.confirmation-message')
-let confirmation_message_create_node = document.querySelector('.confirmation-message-create')
-let confirmation_message_create_rel = document.querySelector('.confirmation-message-create-rel')
+const labelColorMap = {};
+
 
 function randomColor() {
     const hue = Math.floor(Math.random() * 360);
@@ -31,9 +28,6 @@ function colorForLabel(label) {
     return labelColorMap[label];
 }
 
-// END UI SETUP
-
-
 function graphProps(graph) {
     graph.nodeTemplate =
         $(go.Node, "Auto",
@@ -46,7 +40,7 @@ function graphProps(graph) {
                 new go.Binding("fill", "label", function (label) {
                     return colorForLabel(label).fill;
                 }),
-                new go.Binding("stroke", "label", function (label) {
+                new go.Binding("stroke", "label", function () {
                     return `#000`
                 })
             ),
@@ -96,8 +90,9 @@ function graphProps(graph) {
     graph.commandHandler.canDeleteSelection = function () {
         return false;
     };
-
 }
+
+// -----------------| FUNCTIONALITY |-----------------
 
 async function linkGraphToBackend(graph) {
     const nodes = await makeGet("api/nodes");
@@ -112,6 +107,7 @@ async function linkGraphToBackend(graph) {
 
     const linkDataArray = edges.map(edge => ({
         from: edge.startNodeId,
+        id: edge.properties.id,
         to: edge.destinationNodeId,
         text: edge.relationshipType,
         startId: edge.properties.startNodeId,
@@ -122,7 +118,6 @@ async function linkGraphToBackend(graph) {
     graph.model = new go.GraphLinksModel(nodeDataArray, linkDataArray);
     populateNodeDropdowns(graph);
 }
-
 
 function load_graph() {
     graph = $(go.Diagram, "graphDiv", {
@@ -145,9 +140,7 @@ function load_graph() {
         const part = e.subject.part;
 
         if (!(part instanceof go.Node || part instanceof go.Link)) return;
-        confirmation_message.innerHTML = ""
-        confirmation_message_create_rel = ""
-        confirmation_message_create_node = ""
+
         if (part instanceof go.Node) {
             showInfo(part.data, "Node");
         } else if (part instanceof go.Link) {
@@ -182,6 +175,8 @@ function showLabelForNode(sidebar, data, props) {
 
 function showLabelForRelationship(sidebar, data) {
     sidebar.querySelector(".display-class").textContent = "(relationship type)"
+    sidebar.querySelector("#label").style.backgroundColor = "";
+    sidebar.querySelector("#label").style.border = "0px solid gray";
     const display_name = sidebar.querySelector(".display-name");
     display_name.innerHTML = " → ";
     display_name.innerHTML += data.text;
@@ -198,12 +193,10 @@ function showPropertiesForAllTypes(sidebar, data, props, type) {
     else
         currentEditingEntity = data
 
-    console.log("CURRENT EDITING ENTITY: ", currentEditingEntity)
-
     const keys = Object.keys(props);
     keys.forEach(key => {
         if (key !== 'id' && key !== 'destinationNodeId' && key !== 'sourceNodeId') {
-            const li = createPropertyInput(key, props[key], data, type);
+            const li = createPropertyInput(key, props[key], data, type, true);
             propertiesList.appendChild(li);
         }
     });
@@ -212,8 +205,6 @@ function showPropertiesForAllTypes(sidebar, data, props, type) {
     saveChangesButton.onclick = function () {
         handleEditProperty(type);
     };
-
-    console.log(type)
 
     const liAddNew = document.createElement("li");
     liAddNew.innerHTML = ` 
@@ -226,23 +217,28 @@ function showPropertiesForAllTypes(sidebar, data, props, type) {
 
     const addNewIcon = liAddNew.querySelector('span');
     addNewIcon.addEventListener('click', () => {
-        const newLi = createPropertyInput("", "", data, type);
+        const newLi = createPropertyInput("", "", data, type, false);
         propertiesList.insertBefore(newLi, liAddNew);
     });
 }
 
-
-function createPropertyInput(key, value, data, type) {
+function createPropertyInput(key, value, data, type, disable) {
     const li = document.createElement("li");
     if (key !== 'displayName') {
-        li.innerHTML = `  
-        <input type="text" style="width:40%" value="${key}" placeholder="Key" class="d-inline-block form-control key-input form-control-sm" />
+        if (disable) {
+            li.innerHTML = `  
+            <input type="text" style="width:40%" disabled value="${key}" placeholder="Key" class="d-inline-block form-control key-input form-control-sm" />`;
+        } else {
+            li.innerHTML = `  
+            <input type="text" style="width:40%" value="${key}" placeholder="Key" class="d-inline-block form-control key-input form-control-sm" />`;
+        }
+        li.innerHTML += `
         <span class="d-inline-block text-center" style="width: 5%;">→</span>
         <input type="text" style="width: 40%" value="${value}" placeholder="Value" class="d-inline-block form-control value-input form-control-sm"/>
         <span class="d-inline-block text-center delete-btn" style="width: 5%; cursor: pointer; color: dimgray; font-size: 1.3rem;">
             <i class="bi bi-trash"></i>
         </span>
-    `;
+        `;
 
         const keyInput = li.querySelector('.key-input');
         const deleteBtn = li.querySelector('.delete-btn');
@@ -256,16 +252,17 @@ function createPropertyInput(key, value, data, type) {
         <input type="text" style="width:40%" value="${key}" disabled placeholder="Key" class="d-inline-block form-control key-input form-control-sm" />
         <span class="d-inline-block text-center" style="width: 5%;">→</span>
         <input type="text" style="width: 40%" value="${value}" placeholder="Value" class="d-inline-block form-control value-input form-control-sm"/>
+        
+        <span class="d-inline-block text-center" style="width: 5%; color: #3399ff; font-size: 1.3rem;">
+            <i class="bi bi-eye"></i>
+        </span>
         `;
     }
 
     return li;
 }
 
-
-
 async function deleteNodeProperty(entity, propertyKey, type) {
-    console.log(entity, propertyKey, type);
     let link = null;
 
     if (type === "Node") {
@@ -274,15 +271,12 @@ async function deleteNodeProperty(entity, propertyKey, type) {
         link = `/api/relationships/delete-property/${entity.from}/${entity.to}/${propertyKey}`;
     }
 
-    console.log("LINK: ", link);
-
     try {
         const response = await fetch(link, {
             method: 'DELETE'
         });
 
         if (response.ok) {
-            console.log(`Property '${propertyKey}' deleted successfully.`);
             await linkGraphToBackend(graph); // Reload the graph
         } else {
             console.error(`Failed to delete property '${propertyKey}':`, await response.text());
@@ -293,9 +287,7 @@ async function deleteNodeProperty(entity, propertyKey, type) {
 }
 
 async function handleEditProperty(type) {
-    console.log(currentEditingEntity)
     if (!currentEditingEntity) {
-        console.log("No entity selected for editing.");
         return;
     }
 
@@ -319,44 +311,84 @@ async function handleEditProperty(type) {
 
     Object.assign(updatedProperties, editedProperties);
 
-    console.log("Saving changes for node:", currentEditingEntity);
-    console.log("Properties to save:", updatedProperties);
-
     await callEditEntityProperties(currentEditingEntity, updatedProperties, type)
 }
 
 async function callEditEntityProperties(currentEditingEntity, updatedProperties, type) {
-    let link_call = null
+    let link_call ;
     if (type === "Node")
         link_call = `api/nodes/edit/${currentEditingEntity}`
     else
         link_call = `api/relationships/edit/${currentEditingEntity.from}/${currentEditingEntity.to}`
 
     try {
-        const response = await fetch(link_call, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(updatedProperties)
-        });
-
-        if (response.ok) {
-            console.log("Properties updated successfully.");
-            confirmation_message.innerHTML = "Property saved successfully."
-            await linkGraphToBackend(graph);
-
-
-        } else {
-            console.error("Failed to update properties:", await response.text());
-
-        }
+        await makePatchJsonBody(updatedProperties, link_call)
+        await linkGraphToBackend(graph);
     } catch (error) {
-        console.error("Error occurred while updating properties:", error);
+        console.error("Error occurred while updating properties: ", error);
     }
-
 }
 
+async function deleteEntity() {
+    const selectedEntity = graph.selection.first();
+    let currentEntityType = ""
+
+    if (selectedEntity instanceof go.Node) {
+        currentEntityType = "Node"
+    } else if (selectedEntity instanceof go.Link) {
+        currentEntityType = "Relationship"
+    }
+
+    if (selectedEntity) {
+        const confirmation = confirm("Are you sure you want to delete the selected entity? It may cascade to related relationships.");
+        if (confirmation) {
+            try {
+                if (currentEntityType === "Node") {
+                    graph.commandHandler.deleteSelection();
+                    const nodeId = selectedEntity.data.key;
+                    await makePostPathVar(nodeId, "api/nodes/delete");
+
+                } else if (currentEntityType === "Relationship") {
+                    graph.commandHandler.deleteSelection();
+                    const relationshipId = selectedEntity.data.id;
+                    await makePostPathVar(relationshipId, "api/relationships/delete");
+                }
+
+                await linkGraphToBackend(graph);
+
+            } catch (error) {
+                console.error("Error during deletion: ", error);
+            }
+        }
+    } else {
+        alert("Please select a node or relationship to delete.");
+    }
+}
+
+function populateNodeDropdowns(graph) {
+    const node1Select = document.getElementById('node1');
+    const node2Select = document.getElementById('node2');
+
+    node1Select.innerHTML = '';
+    node2Select.innerHTML = '';
+
+    graph.nodes.each(function (node) {
+        const label = node.data.text;
+        const nodeId = node.data.key;
+
+        if (label) {
+            const option1 = document.createElement('option');
+            option1.value = nodeId;
+            option1.textContent = label;
+            const option2 = option1.cloneNode(true);
+
+            node1Select.appendChild(option1);
+            node2Select.appendChild(option2);
+        }
+    });
+}
+
+// -----------------| LISTENERS |-----------------
 
 document.addEventListener("DOMContentLoaded", load_graph);
 
@@ -382,11 +414,9 @@ document.getElementById("createNodeBtn").addEventListener("click", async () => {
                 properties: properties
             };
 
-            const response = await makePostJsonBody(postData, "api/nodes/create");
-            confirmation_message_create_node.innerHTML = "Node created."
-            console.log(response);
-            await linkGraphToBackend(graph);
+            await makePostJsonBody(postData, "api/nodes/create");
 
+            await linkGraphToBackend(graph);
 
         } catch (error) {
             console.error('Error during node creation:', error);
@@ -395,6 +425,7 @@ document.getElementById("createNodeBtn").addEventListener("click", async () => {
         alert("Please enter a label and at least one property.");
     }
 });
+
 document.getElementById("createRelationshipBtn").addEventListener("click", async () => {
     const fromNodeId = document.getElementById("node1").value.trim();
     const toNodeId = document.getElementById("node2").value.trim();
@@ -419,9 +450,8 @@ document.getElementById("createRelationshipBtn").addEventListener("click", async
             };
 
             await makePostJsonBody(postData, `api/relationships/create/${fromNodeId}/${toNodeId}`);
-            confirmation_message_create_rel.innerHTML = "Relationship created."
-            await linkGraphToBackend(graph);
 
+            await linkGraphToBackend(graph);
 
 
         } catch (error) {
@@ -431,7 +461,6 @@ document.getElementById("createRelationshipBtn").addEventListener("click", async
         alert("Please fill in all fields and at least one property.");
     }
 });
-
 
 document.querySelector("#addRelationshipPropertyBtn").addEventListener("click", () => {
     const newLi = document.createElement("li");
@@ -458,7 +487,6 @@ document.querySelector("#addRelationshipPropertyBtn").addEventListener("click", 
     });
 });
 
-
 document.querySelector(".add-property-btn").addEventListener("click", () => {
     const newLi = document.createElement("li");
     newLi.innerHTML = `
@@ -481,73 +509,4 @@ document.querySelector(".add-property-btn").addEventListener("click", () => {
     });
 });
 
-
-deleteButton.addEventListener('click', deleteEntity)
-
-async function deleteEntity() {
-    const selectedEntity = graph.selection.first();
-    console.log("Deleting the type of entity: ", selectedEntity);
-    let currentEntityType = ""
-
-    if (selectedEntity instanceof go.Node) {
-        console.log("Selected entity is a Node");
-        currentEntityType = "Node"
-    } else if (selectedEntity instanceof go.Link) {
-        console.log("Selected entity is a Link");
-        currentEntityType = "Relationship"
-    } else {
-        console.log("Selected entity is of unknown type");
-    }
-
-
-    if (selectedEntity) {
-        const confirmation = confirm("Are you sure you want to delete the selected entity? This will cascade to all associated relationships.");
-        if (confirmation) {
-            try {
-                if (currentEntityType === "Node") {
-                    graph.commandHandler.deleteSelection();
-                    const nodeId = selectedEntity.data.key;
-                    await makePostPathVar(nodeId, "api/nodes/delete");
-
-                } else if (currentEntityType === "Relationship") {
-                    graph.commandHandler.deleteSelection();
-                    const relationshipId = selectedEntity.data.id;
-                    await makePostPathVar(relationshipId, "api/relationships/delete");
-                }
-
-                await linkGraphToBackend(graph);
-
-            } catch (error) {
-                console.error("Error during deletion: ", error);
-            }
-        }
-    } else {
-        alert("Please select a node or relationship to delete.");
-    }
-}
-
-
-function populateNodeDropdowns(graph) {
-    const node1Select = document.getElementById('node1');
-    const node2Select = document.getElementById('node2');
-    const form = document.getElementById('connect-nodes-form');
-
-    node1Select.innerHTML = '';
-    node2Select.innerHTML = '';
-    // TODO get values of properties
-    graph.nodes.each(function (node) {
-        const label = node.data.text;
-        const nodeId = node.data.key;
-
-        if (label) {
-            const option1 = document.createElement('option');
-            option1.value = nodeId;
-            option1.textContent = label;
-            const option2 = option1.cloneNode(true);
-
-            node1Select.appendChild(option1);
-            node2Select.appendChild(option2);
-        }
-    });
-}
-
+deleteButton.addEventListener('click', deleteEntity);

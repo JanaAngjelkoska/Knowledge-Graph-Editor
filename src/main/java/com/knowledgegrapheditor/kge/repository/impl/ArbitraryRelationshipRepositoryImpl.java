@@ -1,7 +1,6 @@
 package com.knowledgegrapheditor.kge.repository.impl;
 
 import com.knowledgegrapheditor.kge.model.RelationshipDTO;
-import com.knowledgegrapheditor.kge.repository.ArbitraryNodeRepository;
 import com.knowledgegrapheditor.kge.repository.ArbitraryRelationshipRepository;
 import com.knowledgegrapheditor.kge.util.RelationshipSerializer;
 import org.neo4j.driver.*;
@@ -17,14 +16,11 @@ import java.util.UUID;
 public class ArbitraryRelationshipRepositoryImpl implements ArbitraryRelationshipRepository {
 
     private final Driver driver;
-    private final ArbitraryNodeRepository nodeRepository;
     private final SessionConfig sessionConfig;
 
     public ArbitraryRelationshipRepositoryImpl(Driver driver,
-                                               ArbitraryNodeRepository nodeRepository,
                                                @Qualifier("UseDatabase") SessionConfig sessionConfig) {
         this.driver = driver;
-        this.nodeRepository = nodeRepository;
         this.sessionConfig = sessionConfig;
     }
 
@@ -107,30 +103,6 @@ public class ArbitraryRelationshipRepositoryImpl implements ArbitraryRelationshi
                     .orElseThrow(() -> new RuntimeException("Failed to create relationship"));
         }
     }
-
-    @Override
-    public Optional<RelationshipDTO> modifyLabelOf(UUID sourceNodeId, UUID destinationNodeId, String newLabel) {
-        try (Session session = driver.session(sessionConfig)) {
-            String query = "MATCH (a)-[r]->(b) " +
-                    "WHERE a.id = $sourceNodeId AND b.id = $destinationNodeId " +
-                    "CREATE (a)-[newRel:" + newLabel + "]->(b) " +
-                    "SET newRel = r " +
-                    "DELETE r " +
-                    "RETURN newRel";
-
-            Map<String, Object> queryParameters = new HashMap<>();
-            queryParameters.put("sourceNodeId", sourceNodeId.toString());
-            queryParameters.put("destinationNodeId", destinationNodeId.toString());
-
-            Result result = session.run(query, queryParameters);
-            return result
-                    .stream()
-                    .map(record -> RelationshipSerializer.serialize(record, "newRel"))
-                    .findFirst();
-        }
-
-    }
-
 
     @Override
     public boolean deleteBySourceAndDestinationNodeId(UUID sourceId, UUID destinationId) {

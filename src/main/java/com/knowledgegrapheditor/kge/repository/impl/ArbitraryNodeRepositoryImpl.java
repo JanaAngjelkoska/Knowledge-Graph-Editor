@@ -43,23 +43,6 @@ public class ArbitraryNodeRepositoryImpl implements ArbitraryNodeRepository {
     }
 
     @Override
-    public Iterable<NodeDTO> findAllByLabel(String label) {
-        String referencer = "n";
-
-        String query = String.format("MATCH (%s:%s) RETURN %s", referencer, label, referencer);
-
-        try (Session session = driver.session(databaseConfig)) {
-
-            Result result = session.run(query);
-
-            return result
-                    .stream()
-                    .map(record -> NodeSerializer.serialize(record, referencer))
-                    .toList();
-        }
-    }
-
-    @Override
     public Iterable<NodeDTO> findAll() {
         String referencer = "n";
 
@@ -127,7 +110,6 @@ public class ArbitraryNodeRepositoryImpl implements ArbitraryNodeRepository {
 
     }
 
-    // used for adding and updating existing properties
     @Override
     public Optional<NodeDTO> updateProperties(UUID _id, String key, Object value) {
         if (findById(_id).isEmpty()) {
@@ -170,6 +152,4 @@ public class ArbitraryNodeRepositoryImpl implements ArbitraryNodeRepository {
                     .findFirst();
         }
     }
-
-
 }

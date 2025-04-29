@@ -53,7 +53,6 @@ export async function makePostJsonBody(postData, endpointSuffix) {
         throw new Error(`Could not fulfill request, got: ${response}`)
     }
 
-
     return await response.json();
 }
 
@@ -63,7 +62,7 @@ export async function makePostJsonBody(postData, endpointSuffix) {
  * @param endpointSuffix The endpoint (suffix) of the API.
  * @returns {Promise<any>} JSON containing requested result.
  **/
-export async function makeGetPathVar (pathVariable, endpointSuffix) {
+export async function makeGetPathVar(pathVariable, endpointSuffix) {
 
     const url = `${base}/${endpointSuffix}/${pathVariable}`;
 
@@ -86,7 +85,7 @@ export async function makeGetPathVar (pathVariable, endpointSuffix) {
  * @param endpointSuffix The endpoint (suffix) of the API.
  * @returns {Promise<any>} JSON containing requested result.
  **/
-export async function makeGet (endpointSuffix) {
+export async function makeGet(endpointSuffix) {
 
     const url = `${base}/${endpointSuffix}`;
 
@@ -123,7 +122,7 @@ export async function makePostFormData(endpointSuffix, param1, param2) {
         headers: {
             'Accept': 'application/json',
         },
-        body: formData, // will automatically set content type to form data, so no need to specify in headers
+        body: formData,
     });
 
     if (!response.ok) {
@@ -133,3 +132,21 @@ export async function makePostFormData(endpointSuffix, param1, param2) {
     return await response.json();
 }
 
+export async function makePatchJsonBody(postData, endpointSuffix) {
+
+    const url = `${base}/${endpointSuffix}`
+
+    const response = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(postData)
+    });
+
+    if (!response.ok) {
+        throw new Error(`Could not fulfill request, got: ${response}`);
+    }
+
+    return response.json();
+}

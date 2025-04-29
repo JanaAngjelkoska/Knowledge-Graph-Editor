@@ -10,7 +10,9 @@ public class RelationshipDTO {
     private String relationshipType;
 
 
-    public RelationshipDTO() {}
+    public RelationshipDTO() {
+
+    }
 
     public RelationshipDTO(String startNodeId, String destinationNodeId, Map<String, Object> properties, String relationshipType) {
         this.startNodeId = startNodeId;

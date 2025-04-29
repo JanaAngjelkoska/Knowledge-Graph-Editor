@@ -1,5 +1,7 @@
 @import "main.css";
 
+/* ============ properties ============ */
+
 .main-container {
     display: flex;
     flex-direction: column;
@@ -45,7 +47,7 @@ html, body {
 }
 
 .container-fluid.fade-in.mt-1 {
-    height: calc(100% - 80px); /* Subtract navbar height if needed */
+    height: calc(100% - 80px);
 }
 
 .row {
@@ -71,7 +73,8 @@ html, body {
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
 }
 
-/*========= anim ==========*/
+/* ============ anim ============ */
+
 @keyframes pulse {
     0% {
         opacity: 1;
