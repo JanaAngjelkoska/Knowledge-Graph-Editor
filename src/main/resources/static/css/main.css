@@ -48,7 +48,7 @@
     border: 1px solid #606060;
     border-radius: 25px;
     background: white;
-    padding: 15px 15px 15px 0;
+    padding: 0px 15px 15px 15px;
 }
 
 .add-new-msg{
