@@ -21,5 +21,9 @@ public interface RelationshipService {
 
     Optional<RelationshipDTO> updateProperty(UUID startId, UUID endId, String key, Object value);
 
+    Optional<RelationshipDTO> updateProperty(UUID relationshipId, String key, Object value);
+
+    Optional<RelationshipDTO> removeProperty(UUID relationshipId, String key);
+
     Optional<RelationshipDTO> removeProperty(UUID startId, UUID endId, String key);
 }

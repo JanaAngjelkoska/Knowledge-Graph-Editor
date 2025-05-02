@@ -178,6 +178,33 @@ public class ArbitraryRelationshipRepositoryImpl implements ArbitraryRelationshi
     }
 
     @Override
+    public Optional<RelationshipDTO> editProperty(UUID relationshipId, String key, Object updatedValue) {
+        String referencer = "r";
+        String sRelationshipId = relationshipId.toString();
+
+        String query = String.format(
+                "MATCH ()-[%s]-() " +
+                        "WHERE %s.id = $relationshipId " +
+                        "SET %s.%s = $value " +
+                        "RETURN %s;",
+                referencer, referencer, referencer, key, referencer
+        );
+
+        try (Session session = driver.session(sessionConfig)) {
+            Result result = session.run(query,
+                    Values.parameters(
+                            "relationshipId", sRelationshipId,
+                            "value", updatedValue
+                    )
+            );
+
+            return result.stream()
+                    .map(record -> RelationshipSerializer.serialize(record, referencer))
+                    .findFirst();
+        }
+    }
+
+    @Override
     public Optional<RelationshipDTO> deleteProperty(UUID startId, UUID endId, String key) {
         String start = startId.toString();
         String end = endId.toString();
@@ -200,4 +227,27 @@ public class ArbitraryRelationshipRepositoryImpl implements ArbitraryRelationshi
                     .findFirst();
         }
     }
+
+    @Override
+    public Optional<RelationshipDTO> deleteProperty(UUID relationshipId, String key) {
+        String referencer = "r";
+        String sRelationshipId = relationshipId.toString();
+
+        String query = String.format(
+                "MATCH ()-[%s]-() " +
+                        "WHERE %s.id = $relationshipId " +
+                        "REMOVE %s.%s " +
+                        "RETURN %s;",
+                referencer, referencer, referencer, key, referencer
+        );
+
+        try (Session session = driver.session(sessionConfig)) {
+            Result result = session.run(query,
+                    Values.parameters("relationshipId", sRelationshipId)
+            );
+
+            return result.stream()
+                    .map(record -> RelationshipSerializer.serialize(record, referencer))
+                    .findFirst();
+        }    }
 }

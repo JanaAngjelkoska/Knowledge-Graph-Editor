@@ -274,7 +274,7 @@ async function deleteNodeProperty(entity, propertyKey, type) {
     if (type === "Node") {
         link = `/api/nodes/delete-property/${entity}/${propertyKey}`;
     } else if (type === "Relationship") {
-        link = `/api/relationships/delete-property/${entity.from}/${entity.to}/${propertyKey}`;
+        link = `/api/relationships/delete-property/${entity.id}/${propertyKey}`;
     }
 
     try {
@@ -321,11 +321,12 @@ async function handleEditProperty(type) {
 }
 
 async function callEditEntityProperties(currentEditingEntity, updatedProperties, type) {
-    let link_call ;
+    let link_call;
+
     if (type === "Node")
         link_call = `api/nodes/edit/${currentEditingEntity}`
     else
-        link_call = `api/relationships/edit/${currentEditingEntity.from}/${currentEditingEntity.to}`
+        link_call = `api/relationships/edit/${currentEditingEntity.id}`
 
     try {
         await makePatchJsonBody(updatedProperties, link_call)

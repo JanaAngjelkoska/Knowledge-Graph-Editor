@@ -21,5 +21,9 @@ public interface ArbitraryRelationshipRepository {
 
     Optional<RelationshipDTO> editProperty(UUID startId, UUID endId, String key, Object updatedValue);
 
+    Optional<RelationshipDTO> editProperty(UUID relationshipId, String key, Object updatedValue);
+
     Optional<RelationshipDTO> deleteProperty(UUID startId, UUID endId, String key);
+
+    Optional<RelationshipDTO> deleteProperty(UUID relationshipId, String key);
 }

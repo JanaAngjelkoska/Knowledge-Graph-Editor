@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.Reader;
 import java.util.*;
 
 @RestController
@@ -101,11 +102,32 @@ public class RelationshipApiController {
         return ResponseEntity.ok(list);
     }
 
+    @PatchMapping("/edit/{relationshipId}")
+    public ResponseEntity<RelationshipDTO> editProperties(@PathVariable UUID relationshipId,
+                                                          @RequestBody Map<String, Object> request) {
+
+        Optional<RelationshipDTO> relationship = Optional.empty();
+        for (Map.Entry<String, Object> entry : request.entrySet()) {
+            relationship = relationshipService.updateProperty(relationshipId, entry.getKey(), entry.getValue());
+        }
+
+        return relationship.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping("/delete-property/{startId}/{endId}/{propertyKey}")
     public ResponseEntity<Void> deleteProperty(@PathVariable UUID startId,
                                                @PathVariable UUID endId,
                                                @PathVariable String propertyKey) {
         Optional<RelationshipDTO> result = relationshipService.removeProperty(startId, endId, propertyKey);
+        return result.isPresent() ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("/delete-property/{relationshipId}/{propertyKey}")
+    public ResponseEntity<Void> deleteProperty(@PathVariable UUID relationshipId,
+                                         @PathVariable String propertyKey) {
+        Optional<RelationshipDTO> result = relationshipService.removeProperty(relationshipId, propertyKey);
+
         return result.isPresent() ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 

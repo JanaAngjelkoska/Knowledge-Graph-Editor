@@ -54,6 +54,16 @@ public class RelationshipServiceImpl implements RelationshipService {
     }
 
     @Override
+    public Optional<RelationshipDTO> updateProperty(UUID relationshipId, String key, Object value) {
+        return relationshipRepository.editProperty(relationshipId, key, value);
+    }
+
+    @Override
+    public Optional<RelationshipDTO> removeProperty(UUID relationshipId, String key) {
+        return relationshipRepository.deleteProperty(relationshipId, key);
+    }
+
+    @Override
     public Optional<RelationshipDTO> removeProperty(UUID startId, UUID endId, String key) {
         return relationshipRepository.deleteProperty(startId, endId, key);
     }
