@@ -13,9 +13,9 @@ public class Neo4jDbConfig {
     @Primary
     @Scope("singleton")
     public Driver getPreconfiguredNeo4jDriver() {
-        String uri = "bolt://localhost:7687";  // using default uri
+        String uri = "bolt://localhost:7687";
         String username = "neo4j";
-        String password = "neo4j123"; // CHANGE AND HASH PASSWORD IN PROD
+        String password = "neo4j123";
 
         return GraphDatabase.driver(
                 uri,
@@ -25,7 +25,7 @@ public class Neo4jDbConfig {
 
     @Bean(name="UseDatabase")
     public SessionConfig getPreconfiguredNeo4jDatabaseSessionConfig() {
-        String dbName = "knowledgegrapheditor"; // change this to an arbitrary existent database's name
+        String dbName = "knowledgegrapheditor"; // change this to an arbitrary existent database's name in the active Neo4j DBMS
         return SessionConfig.forDatabase(dbName);
     }
 

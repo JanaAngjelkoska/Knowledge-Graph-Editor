@@ -132,8 +132,8 @@ function load_graph() {
         "commandHandler.canPasteSelection": () => false,
         layout: $(go.ForceDirectedLayout, {
             defaultSpringLength: 2E2,
-            defaultElectricalCharge: 3E2,
-            maxIterations: 5E3
+            defaultElectricalCharge: 5E2,
+            maxIterations: 1E4
         })
     });
 
