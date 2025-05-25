@@ -8,6 +8,10 @@
     height: 100vh;
 }
 
+button:hover, a:hover {
+    cursor: url('/img/click.png') 0 0, auto; !important;
+}
+
 .header {
     padding: 1rem 2rem 0.5rem;
 }
@@ -95,4 +99,7 @@ html, body {
     animation: pulse 2s infinite ease-in-out;
 }
 
+body {
+    cursor: url('/img/cursor.png') 0 0, auto;
+}
 /* ============ radial menu pop-up ============== */

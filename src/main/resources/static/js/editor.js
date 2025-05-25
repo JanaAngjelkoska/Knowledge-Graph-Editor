@@ -2,6 +2,8 @@ import {makeGet, makePatchJsonBody, makePostJsonBody, makePostPathVar} from './r
 
 // -----------------| UI SETUP & GLOBAL VAR SETUP |-----------------
 
+// graph
+
 const $ = go.GraphObject.make;
 const deleteButton = document.getElementById('delete-btn');
 let graph;
@@ -214,7 +216,7 @@ function showPropertiesForAllTypes(sidebar, data, props, type) {
 
     const liAddNew = document.createElement("li");
     liAddNew.innerHTML = ` 
-        <span class="mx-1" style="cursor: pointer; color: dimgray; font-size: 1.3rem;"> 
+        <span class="mx-1" style="cursor: url('img/click.png') 0 0, auto; color: dimgray; font-size: 1.3rem;"> 
             <i class="bi bi-plus-circle-fill"></i>
             <span class="add-new-msg">Add a new property</span> 
         </span>
@@ -241,7 +243,7 @@ function createPropertyInput(key, value, data, type, disable) {
         li.innerHTML += `
         <span class="d-inline-block text-center" style="width: 5%;">→</span>
         <input type="text" style="width: 40%" value="${value}" placeholder="Value" class="d-inline-block form-control value-input form-control-sm"/>
-        <span class="d-inline-block text-center delete-btn" style="width: 5%; cursor: pointer; color: dimgray; font-size: 1.3rem;">
+        <span class="d-inline-block text-center delete-btn" style="width: 5%; cursor: url('/img/click.png') 0 0, auto; color: dimgray; font-size: 1.3rem;">
             <i class="bi bi-trash"></i>
         </span>
         `;
