@@ -44,16 +44,19 @@
             <i class="bi bi-node-plus"></i> Add Node
         </button>
 
-
-        <button class="btn btn-sm btn-outline-secondary givefont me-2" id="add-relationship-btn" data-bs-toggle="modal"
-                data-bs-target="#addRelationshipModal">
-            <i class="bi bi-link-45deg"></i> Connect Nodes
-        </button>
-
-
         <button class="btn btn-sm btn-outline-danger givefont" id="delete-btn">
-            <i class="bi bi-trash"></i> Delete
+            <i class="bi bi-trash"></i> Delete Selection
         </button>
+
+        <span class="pulse ms-3" id="statusCurrentlyConnectingTo" style="display: none">
+            <i class="bi bi-link-45deg m-1"></i>
+
+            In connect mode - Click a node to connect to |
+            <button class="btn btn-sm ms-1 btn-outline-danger" id="resetConnectingButton">
+                <i class="bi bi-stop" style="color: #8a0000;"></i>
+                Stop Connecting
+            </button>
+        </span>
     </div>
 
     <div class="container-fluid fade-in py-2 mt-1">

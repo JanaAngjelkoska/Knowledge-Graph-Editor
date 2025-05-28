@@ -9,6 +9,9 @@ const deleteButton = document.getElementById('delete-btn');
 let graph;
 let editedProperties = {};
 let currentEditingEntity = null;
+let currentlyConnectingFromEntity = null;
+let currentlyConnectingToEntity = null;
+let currentlyConnectingStatus = false;
 const labelColorMap = {};
 
 // confirmation messages
@@ -34,21 +37,197 @@ function colorForLabel(label) {
     return labelColorMap[label];
 }
 
+const contextMenuTemplateNode =
+    $("ContextMenu",
+        $("ContextMenuButton",
+            $(go.Panel, "Horizontal",
+                {padding: 5},
+                $(go.Picture,
+                    {
+                        source: "/img/details.svg",
+                        width: 16, height: 16
+                    }
+                ),
+                $(go.TextBlock, "Details",
+                    {
+                        font: "14px Montserrat",
+                        stroke: "#333",
+                        margin: new go.Margin(2, 8, 2, 8),
+                        name: "DETAILS_TEXT"
+                    }
+                )
+            ),
+            {
+                "ButtonBorder.fill": "#f0f0f0",
+                "ButtonBorder.stroke": "#ccc",
+                mouseEnter: (e, obj) => obj.findObject("DETAILS_TEXT").stroke = "#000",
+                mouseLeave: (e, obj) => obj.findObject("DETAILS_TEXT").stroke = "#333",
+                click: (e, obj) => {
+                    const contextPart = obj.part.adornedPart;
+                    if (contextPart instanceof go.Node) {
+                        showInfo(contextPart.data, "Node");
+                    } else if (contextPart instanceof go.Link) {
+                        showInfo(contextPart.data, "Relationship");
+                    }
+                }
+            }
+        ),
+        $("ContextMenuButton",
+            $(go.Panel, "Horizontal",
+                {padding: 5},
+                $(go.Picture,
+                    {
+                        source: "/img/connect.svg",
+                        width: 16, height: 16
+                    }
+                ),
+                $(go.TextBlock, "Connect",
+                    {
+                        font: "14px Montserrat",
+                        stroke: "#333",
+                        margin: new go.Margin(2, 8, 2, 8),
+                        name: "DETAILS_TEXT"
+                    }
+                )
+            ),
+            {
+                "ButtonBorder.fill": "#f0f0f0",
+                "ButtonBorder.stroke": "#ccc",
+                mouseEnter: (e, obj) => obj.findObject("DETAILS_TEXT").stroke = "#000",
+                mouseLeave: (e, obj) => obj.findObject("DETAILS_TEXT").stroke = "#333",
+                click: (e, obj) => {
+                    const contextPart = obj.part.adornedPart;
+                    if (contextPart instanceof go.Node) {
+
+                        currentlyConnectingStatus = true;
+
+                        let statusConnectingTo = document.getElementById('statusCurrentlyConnectingTo');
+
+                        statusConnectingTo.style.display = '';
+
+                        showInfo(contextPart.data, "Node");
+
+                    } else if (contextPart instanceof go.Link) {
+                        showInfo(contextPart.data, "Relationship");
+                    }
+                }
+            }
+        ),
+        $("ContextMenuButton",
+            $(go.Panel, "Horizontal",
+                {padding: 5},
+                $(go.Picture,
+                    {
+                        source: "/img/delete.svg",
+                        width: 16, height: 16
+                    }
+                ),
+                $(go.TextBlock, "Delete",
+                    {
+                        font: "14px Montserrat",
+                        stroke: "#333",
+                        margin: new go.Margin(2, 8, 2, 8),
+                        name: "DELETE_TEXT"
+                    }
+                )
+            ),
+            {
+                "ButtonBorder.fill": "#f0f0f0",
+                "ButtonBorder.stroke": "#ccc",
+                mouseEnter: (e, obj) => obj.findObject("DELETE_TEXT").stroke = "#d00",
+                mouseLeave: (e, obj) => obj.findObject("DELETE_TEXT").stroke = "#333",
+                click: (e, obj) => {
+                    const contextPart = obj.part.adornedPart;
+                    if (contextPart) {
+                        deleteEntity();
+                    }
+                }
+            }
+        )
+    );
+
+const contextMenuTemplateLink =
+    $("ContextMenu",
+        $("ContextMenuButton",
+            $(go.Panel, "Horizontal",
+                {padding: 5},
+                $(go.Picture,
+                    {
+                        source: "/img/details.svg",
+                        width: 16, height: 16
+                    }
+                ),
+                $(go.TextBlock, "Details",
+                    {
+                        font: "14px Montserrat",
+                        stroke: "#333",
+                        margin: new go.Margin(2, 8, 2, 8),
+                        name: "DETAILS_TEXT"
+                    }
+                )
+            ),
+            {
+                "ButtonBorder.fill": "#f0f0f0",
+                "ButtonBorder.stroke": "#ccc",
+                mouseEnter: (e, obj) => obj.findObject("DETAILS_TEXT").stroke = "#000",
+                mouseLeave: (e, obj) => obj.findObject("DETAILS_TEXT").stroke = "#333",
+                click: (e, obj) => {
+                    const contextPart = obj.part.adornedPart;
+                    if (contextPart instanceof go.Node) {
+                        showInfo(contextPart.data, "Node");
+                    } else if (contextPart instanceof go.Link) {
+                        showInfo(contextPart.data, "Relationship");
+                    }
+                }
+            }
+        ),
+        $("ContextMenuButton",
+            $(go.Panel, "Horizontal",
+                {padding: 5},
+                $(go.Picture,
+                    {
+                        source: "/img/delete.svg",
+                        width: 16, height: 16
+                    }
+                ),
+                $(go.TextBlock, "Delete",
+                    {
+                        font: "14px Montserrat",
+                        stroke: "#333",
+                        margin: new go.Margin(2, 8, 2, 8),
+                        name: "DELETE_TEXT"
+                    }
+                )
+            ),
+            {
+                "ButtonBorder.fill": "#f0f0f0",
+                "ButtonBorder.stroke": "#ccc",
+                mouseEnter: (e, obj) => obj.findObject("DELETE_TEXT").stroke = "#d00",
+                mouseLeave: (e, obj) => obj.findObject("DELETE_TEXT").stroke = "#333",
+                click: (e, obj) => {
+                    const contextPart = obj.part.adornedPart;
+                    if (contextPart) {
+                        deleteEntity();
+                    }
+                }
+            }
+        )
+    );
+
 function graphProps(graph) {
     graph.nodeTemplate =
         $(go.Node, "Auto",
+            {
+                contextMenu: contextMenuTemplateNode
+            },
             $(go.Shape, "Circle",
                 {
                     strokeWidth: 2,
                     width: 80,
                     height: 80
                 },
-                new go.Binding("fill", "label", function (label) {
-                    return colorForLabel(label).fill;
-                }),
-                new go.Binding("stroke", "label", function () {
-                    return `#000`
-                })
+                new go.Binding("fill", "label", label => colorForLabel(label).fill),
+                new go.Binding("stroke", "label", () => "#000")
             ),
             $(go.TextBlock, {
                     font: "light 14px Montserrat",
@@ -69,7 +248,8 @@ function graphProps(graph) {
                 routing: go.Link.Normal,
                 curve: go.Link.None,
                 relinkableFrom: true,
-                relinkableTo: true
+                relinkableTo: true,
+                contextMenu: contextMenuTemplateLink
             },
             $(go.Shape, {strokeWidth: 3, stroke: "#000"}),
             $(go.Shape, {toArrow: "Standard", stroke: null, fill: "#000"}),
@@ -91,6 +271,7 @@ function graphProps(graph) {
                 )
             )
         );
+
 
     graph.commandHandler.deletesTree = false;
     graph.commandHandler.canDeleteSelection = function () {
@@ -125,7 +306,7 @@ async function linkGraphToBackend(graph) {
     populateNodeDropdowns(graph);
 }
 
-function load_graph() {
+function loadGraph() {
     graph = $(go.Diagram, "graphDiv", {
         "undoManager.isEnabled": true,
         allowCopy: false,
@@ -168,7 +349,6 @@ function showInfo(data, type) {
     }
 
     showPropertiesForAllTypes(sidebar, data, props, type)
-
 }
 
 function showLabelForNode(sidebar, data, props) {
@@ -196,10 +376,23 @@ function showPropertiesForAllTypes(sidebar, data, props, type) {
     propertiesList.innerHTML = "";
 
     editedProperties = {};
-    if (type === "Node")
-        currentEditingEntity = data.id ?? data.properties?.id ?? null;
-    else
+    if (type === "Node") {
+
+        if (currentlyConnectingFromEntity !== null) {
+            currentlyConnectingToEntity = data.id ?? data.properties?.id ?? null;
+            openAddRelationshipModal();
+            return;
+        } else {
+            currentEditingEntity = data.id ?? data.properties?.id ?? null;
+        }
+
+        if (currentlyConnectingStatus) {
+            currentlyConnectingFromEntity = currentEditingEntity;
+        }
+
+    } else {
         currentEditingEntity = data
+    }
 
     const keys = Object.keys(props);
     keys.forEach(key => {
@@ -398,9 +591,22 @@ function populateNodeDropdowns(graph) {
     });
 }
 
+function openAddRelationshipModal() {
+    console.log(currentlyConnectingToEntity)
+    console.log(currentEditingEntity)
+    const node1Select = document.getElementById('node1');
+    const node2Select = document.getElementById('node2');
+
+    node1Select.value = currentlyConnectingFromEntity;
+    node2Select.value = currentlyConnectingToEntity;
+
+    const modal = new bootstrap.Modal(document.getElementById('addRelationshipModal'));
+    modal.show();
+}
+
 // -----------------| LISTENERS |-----------------
 
-document.addEventListener("DOMContentLoaded", load_graph);
+document.addEventListener("DOMContentLoaded", loadGraph);
 
 document.getElementById("createNodeBtn").addEventListener("click", async () => {
     const nodeLabels = document.getElementById("nodeLabels").value.trim();
@@ -470,7 +676,20 @@ document.getElementById("createRelationshipBtn").addEventListener("click", async
     } else {
         alert("Please fill in all fields and at least one property.");
     }
+
+    resetAll();
+
 });
+
+function resetAll() {
+    document.getElementById("statusCurrentlyConnectingTo").style.display = 'none';
+    currentlyConnectingFromEntity = null;
+    currentlyConnectingToEntity = null;
+    currentEditingEntity = null;
+    currentlyConnectingStatus = false;
+}
+
+document.querySelector("#resetConnectingButton").addEventListener('click', resetAll);
 
 document.querySelector("#addRelationshipPropertyBtn").addEventListener("click", () => {
     const newLi = document.createElement("li");
