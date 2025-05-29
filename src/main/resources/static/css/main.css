@@ -1,6 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Golos+Text&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Golos+Text&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap');
 /* ============ properties ============ */
+
+::selection {
+    background: #ffc668;
+    color:black;
+}
 
 .givefont {
     font-family: "Montserrat", sans-serif;
@@ -73,6 +77,16 @@
 .fade-in-slower {
     animation: fadeIn 1.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     opacity: 0;
+}
+
+.text-stroke-only {
+    color: #eca900;
+    font-weight: 900;
+    font-family: "Old Standard TT", sans-serif;
+}
+
+.old-standard-tt {
+    font-family: "Old Standard TT", sans-serif;
 }
 
 @keyframes fadeIn {

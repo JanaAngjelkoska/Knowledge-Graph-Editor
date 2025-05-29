@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Knowledge Graph Editor</title>
+    <title> Bloom | Editing Tool </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="./css/editor.css">
@@ -60,8 +60,7 @@
             </span>
         </div>
         <div class="d-flex align-self-end justify-content-end">
-            <div class="border border-1 px-2 py-1 border-dark rounded shadow-sm" style=" border: 1px solid #d9d9d9 !important;
-                background: #fff9eb;">
+            <div class="px-2 py-1 rounded shadow-sm sidebar-header">
                 <div class="form-check form-switch">
                     <input class="form-check-input text-yellow" type="checkbox" id="snapToGridSwitch">
                     <label class="form-check-label" for="snapToGridSwitch">Snap nodes to grid</label>
@@ -72,18 +71,19 @@
 
     <div class="container-fluid fade-in py-2 mt-1">
         <div class="row">
-            <div class="side-bar toolbar rounded h-100 col-3">
+            <div class="side-bar toolbar rounded h-100 col-2">
                 <div class="sidebar d-flex flex-column py-3 pe-2">
-                    <h3 class="sidebar-header text-center">
-                        <i class="bi bi-pencil-square"></i> Editing menu
+                    <h3 class="sidebar-header text-center p-2 rounded shadow-sm">
+                        <i class="bi bi-input-cursor-text"></i> Editing menu
                     </h3>
 
                     <hr>
 
-                    <div>
-                        <span><i class="bi bi-eye me-1"></i>Display name</span>
-                        <span class="display-name badge text-bg-dark" style="font-weight: bolder"></span>
-                        <span class="badge display-class p-1" id="label"
+                    <div class="d-flex align-items-center justify-content-center gap-1 ">
+                        <span><i class="bi bi-eye me-1 fs-5"></i></span>
+                        <span class="display-name badge d-flex align-items-center text-bg-dark"
+                              style="font-weight: bolder"></span>
+                        <span class="badge d-flex align-items-center display-class p-1" id="label"
                               style="font-size: 12px; font-weight: bolder; color: black; border-radius: 5px;"></span>
                         <span id="relTypeText"
                               style="font-size: 12px; font-weight: bolder; color: black;"></span>
@@ -92,11 +92,11 @@
 
                     <hr>
 
-                    <div class="properties">
-                        <p><i class="bi bi-gear me-1"></i>Properties:</p>
-                        <ul class="list-unstyled" id="properties-list">
+                    <div class="properties d-flex flex-column align-items-center justify-content-center">
+                        <p class="text-center"><i class="bi fs-5 bi-gear me-1"></i>Properties</p>
+                        <ul class="list-unstyled d-flex flex-column justify-content-center" id="properties-list">
                         </ul>
-                        <button class="btn btn-sm btn-outline-secondary givefont save-changes-button">
+                        <button class="btn btn-sm btn-outline-primary givefont save-changes-button">
                             <i class="bi bi-save2 me-1"></i>
                             Save changes
                         </button>
@@ -105,73 +105,75 @@
                         <div class="error-message text-bg-danger"></div>
                     </div>
 
-                    <hr>
                 </div>
             </div>
 
-            <div id="graphDiv" class="fade-in col mx-auto w-100 ms-2 border-1"></div>
+            <div id="graphDiv" style="
+                                    border: 1px solid #d6d9dc;" class="fade-in col mx-auto w-100 ms-2 border-1">
+            </div>
         </div>
     </div>
+</div>
 
-    <!-- add node modal -->
-    <div class="modal fade" id="addNodeModal" tabindex="-1" aria-labelledby="addNodeModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addNodeModalLabel fw-bold"><i class="bi bi-node-plus m-1"></i>Node
-                        Creation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+<!-- add node modal -->
+<div class="modal fade givefont" id="addNodeModal" tabindex="-1" aria-labelledby="addNodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addNodeModalLabel"><i class="bi bi-node-plus m-1"></i>Node
+                    Creation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="nodeLabels" class="form-label">Label</label>
+                    <input type="text" class="form-control" id="nodeLabels" placeholder="Enter node label">
                 </div>
-                <div class="modal-body">
+
+                <div class="properties">
+                    <p class="label">Properties:</p>
                     <div class="mb-3">
-                        <label for="nodeLabels" class="form-label">Label</label>
-                        <input type="text" class="form-control" id="nodeLabels" placeholder="Enter node label">
+                        <label for="propertyKey" class="form-label">
+                            Display Name Key
+                            <i class="bi bi-question-circle text-secondary ms-1"
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="right"
+                               title="You can put any key here, it does not matter.">
+                            </i>
+                        </label>
+                        <input type="text" class="form-control" id="propertyKey"
+                               placeholder="Enter arbitrary property key" value="displayName" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label for="propertyValue" class="form-label">
+                            Display Name Value
+                            <i class="bi bi-question-circle text-secondary ms-1"
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="right"
+                               title="The string you input here will display on the node.">
+                            </i>
+                        </label>
+                        <input type="text" class="form-control" id="propertyValue"
+                               placeholder="Enter property value">
                     </div>
 
-                    <div class="properties">
-                        <p class="label">Properties:</p>
-                        <div class="mb-3">
-                            <label for="propertyKey" class="form-label">
-                                Display Name Key
-                                <i class="bi bi-info-circle-fill ms-1"
-                                   data-bs-toggle="tooltip"
-                                   data-bs-placement="right"
-                                   title="You can put any key here, it does not matter.">
-                                </i>
-                            </label>
-                            <input type="text" class="form-control" id="propertyKey"
-                                   placeholder="Enter arbitrary property key" value="displayName" disabled>
-                        </div>
-                        <div class="mb-3">
-                            <label for="propertyValue" class="form-label">
-                                Display Name Value
-                                <i class="bi bi-info-circle-fill ms-1"
-                                   data-bs-toggle="tooltip"
-                                   data-bs-placement="right"
-                                   title="The string you input here will display on the node.">
-                                </i>
-                            </label>
-                            <input type="text" class="form-control" id="propertyValue"
-                                   placeholder="Enter property value">
-                        </div>
-
-                        <span>
-                            <i class="bi bi-plus-circle-fill mx-1 add-property-btn"
+                    <span>
+                            <i class="bi bi-plus-circle-dotted mx-1 add-property-btn"
                                style="cursor: url('img/click.png') 0 0, auto; color: dimgray; font-size: 1.3rem;">
-                                <span class="add-new-msg">Add a new property</span>
+                                <span class="add-new-msg clickable">Add a new property</span>
                             </i>
                         </span>
 
-                        <ul class="list-unstyled mt-3" id="propertyList">
-                        </ul>
-                    </div>
+                    <ul class="list-unstyled mt-3" id="propertyList">
+                    </ul>
                 </div>
+            </div>
 
-                <div class="modal-footer">
-                    <div class="confirmation-message-create"></div>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn form-btns" id="createNodeBtn">Create Node</button>
-                </div>
+            <div class="modal-footer">
+                <div class="confirmation-message-create"></div>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn form-btns" id="createNodeBtn">Create Node</button>
             </div>
         </div>
     </div>
@@ -179,13 +181,15 @@
 
 
 <!-- add relationship modal -->
-<div class="modal fade givefont" id="addRelationshipModal" tabindex="-1" aria-labelledby="addRelationshipModalLabel"
+<div class="modal fade givefont" id="addRelationshipModal" tabindex="-1"
+     aria-labelledby="addRelationshipModalLabel"
      aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
 
-                <h5 class="modal-title" id="addRelationshipModalLabel"><i class="bi bi-link-45deg m-1"></i>Connect Nodes
+                <h5 class="modal-title" id="addRelationshipModalLabel"><i class="bi bi-link-45deg m-1"></i>Connect
+                    Nodes
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -207,7 +211,7 @@
                         <div class="mb-3">
                             <label for="relationshipType" class="form-label">
                                 Relationship Type
-                                <i class="bi bi-info-circle-fill ms-1"
+                                <i class="bi bi-question-circle text-secondary ms-1"
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="right"
                                    title="This is the semantic meaning of the connection.
@@ -223,9 +227,9 @@
                         <ul class="list-unstyled mt-3" id="relationshipPropertyList">
                         </ul>
                         <span id="addRelationshipPropertyBtn">
-                            <i class="bi bi-plus-circle-fill mx-1 add-property-btn"
+                            <i class="bi bi-plus-circle-dotted mx-1 add-property-btn"
                                style="cursor: url('img/click.png') 0 0, auto; color: dimgray; font-size: 1.3rem;">
-                                <span class="add-new-msg">Add a new property</span>
+                                <span class="add-new-msg clickable">Add a new property</span>
                             </i>
                         </span>
                     </div>
@@ -237,7 +241,6 @@
                     <button type="button" class="btn form-btns" id="createRelationshipBtn">Create Relationship
                     </button>
                 </div>
-
             </div>
         </div>
     </div>

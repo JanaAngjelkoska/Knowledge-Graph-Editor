@@ -224,18 +224,19 @@ function graphProps(graph) {
             $(go.Shape, "Circle",
                 {
                     strokeWidth: 2,
-                    width: 80,
-                    height: 80
+                    width: 90,
+                    height: 90
                 },
                 new go.Binding("fill", "label", label => colorForLabel(label).fill),
                 new go.Binding("stroke", "label", () => "#000")
             ),
             $(go.TextBlock, {
-                    font: "light 14px Montserrat",
+                    font: "light 30px Montserrat",
                     textAlign: "center",
                     stroke: "black",
                     wrap: go.TextBlock.WrapFit,
-                    maxSize: new go.Size(50, NaN),
+
+                    maxSize: new go.Size(60, NaN),
                     overflow: go.TextBlock.OverflowClip,
                     verticalAlignment: go.Spot.Center
                 },
@@ -247,10 +248,14 @@ function graphProps(graph) {
         $(go.Link,
             {
                 routing: go.Link.Normal,
-                curve: go.Link.None,
+                curve: go.Link.Bezier,
+                adjusting: go.Link.Stretch,
                 relinkableFrom: true,
                 relinkableTo: true,
-                contextMenu: contextMenuTemplateLink
+                contextMenu: contextMenuTemplateLink,
+                reshapable: true,
+                resegmentable: true,
+
             },
             $(go.Shape, {strokeWidth: 3, stroke: "#000"}),
             $(go.Shape, {toArrow: "Standard", stroke: null, fill: "#000"}),
@@ -262,7 +267,7 @@ function graphProps(graph) {
                 $(go.TextBlock,
                     {
                         margin: new go.Margin(1, 2),
-                        font: "light 14px Montserrat",
+                        font: "light 18px Montserrat",
                         stroke: "white",
                         editable: false,
                         wrap: go.TextBlock.WrapFit,
@@ -283,12 +288,13 @@ function graphProps(graph) {
 // -----------------| FUNCTIONALITY |-----------------
 
 async function linkGraphToBackend(graph) {
+
     const nodes = await makeGet("api/nodes");
     const edges = await makeGet("api/relationships");
 
     const nodeDataArray = nodes.map(node => ({
         key: node.properties.id,
-        text: node.properties.displayName,
+        text: node.properties.displayName.trim(),
         label: node.labels[0],
         properties: node.properties
     }));
@@ -297,22 +303,24 @@ async function linkGraphToBackend(graph) {
         from: edge.startNodeId,
         id: edge.properties.id,
         to: edge.destinationNodeId,
-        text: edge.relationshipType,
+        text: edge.relationshipType.trim(),
         startId: edge.properties.startNodeId,
         endId: edge.properties.endId,
         properties: edge.properties
     }));
 
     graph.model = new go.GraphLinksModel(nodeDataArray, linkDataArray);
+
     populateNodeDropdowns(graph);
+
 }
 
 function loadGraph() {
     graph = $(go.Diagram, "graphDiv", {
         grid: $(go.Panel, "Grid",
-            {gridCellSize: new go.Size(10, 10)},
-            $(go.Shape, "LineH", {stroke: "#F3F4F3"}),
-            $(go.Shape, "LineV", {stroke: "#F3F4F3"})
+            {gridCellSize: new go.Size(20, 20)},
+            $(go.Shape, "LineH", {stroke: "#ececec"}),
+            $(go.Shape, "LineV", {stroke: "#ececec"})
         ),
         "draggingTool.isGridSnapEnabled": snapToGrid,
         "resizingTool.isGridSnapEnabled": snapToGrid,
@@ -323,9 +331,9 @@ function loadGraph() {
         "commandHandler.canCopySelection": () => false,
         "commandHandler.canPasteSelection": () => false,
         layout: $(go.ForceDirectedLayout, {
-            defaultSpringLength: 2E2,
-            defaultElectricalCharge: 5E2,
-            maxIterations: 1E4
+            defaultSpringLength: 100,
+            defaultElectricalCharge: 1500,
+            maxIterations: 200000
         })
     });
 
@@ -418,9 +426,9 @@ function showPropertiesForAllTypes(sidebar, data, props, type) {
 
     const liAddNew = document.createElement("li");
     liAddNew.innerHTML = ` 
-        <span class="mx-1" style="cursor: url('img/click.png') 0 0, auto; color: dimgray; font-size: 1.3rem;"> 
-            <i class="bi bi-plus-circle-fill"></i>
-            <span class="add-new-msg">Add a new property</span> 
+        <span class="mx-1 text-center" style="cursor: url('img/click.png') 0 0, auto; color: dimgray; font-size: 1.3rem;"> 
+            <i class="bi bi-plus-circle-dotted clickable"></i>
+            <span class="add-new-msg clickable ">Add a new property</span> 
         </span>
     `;
     propertiesList.appendChild(liAddNew);
@@ -534,7 +542,10 @@ async function callEditEntityProperties(currentEditingEntity, updatedProperties,
 
     try {
         await makePatchJsonBody(updatedProperties, link_call)
-        save_changes_msg.innerHTML = "Changes saved."
+        save_changes_msg.innerHTML = `
+        <i class="bi bi-check-circle me"></i>
+        <span>Changes saved</span>
+        `
         await linkGraphToBackend(graph);
     } catch (error) {
         console.error("Error occurred while updating properties: ", error);
@@ -639,8 +650,13 @@ document.getElementById("createNodeBtn").addEventListener("click", async () => {
                 properties: properties
             };
 
+            console.log(properties)
+
             await makePostJsonBody(postData, "api/nodes/create");
-            create_node_msg.innerHTML = "Node created."
+            create_node_msg.innerHTML = `
+                <i class="bi bi-check-circle"></i>
+                <span class="me-1">Node Created.</span>
+            `
             await linkGraphToBackend(graph);
 
         } catch (error) {
@@ -670,12 +686,15 @@ document.getElementById("createRelationshipBtn").addEventListener("click", async
             const postData = {
                 startNodeId: fromNodeId,
                 endNodeId: toNodeId,
-                relationshipType: relationshipType.toString(),
+                relationshipType: relationshipType.toString().trim(),
                 properties: properties
             };
 
             await makePostJsonBody(postData, `api/relationships/create/${fromNodeId}/${toNodeId}`);
-            create_rel_msg.innerHTML = "Relationship created."
+            create_rel_msg.innerHTML = `
+                <i class="bi bi-check-circle"></i>
+                <span class="me-1">Relationship Created.</span>
+            `
             await linkGraphToBackend(graph);
 
 

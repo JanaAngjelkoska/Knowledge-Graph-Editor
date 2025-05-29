@@ -8,12 +8,17 @@
     height: 100vh;
 }
 
-button:hover, a:hover {
+button:hover, a:hover, input:hover, .clickable {
     cursor: url('/img/click.png') 0 0, auto; !important;
 }
 
-.header {
-    padding: 1rem 2rem 0.5rem;
+:not(button:hover, a:hover, input:hover) {
+    cursor: url('/img/cursor.png') 0 0, auto; !important;
+}
+
+.sidebar-header {
+    border: 1px solid #d9d9d9;
+    background-color: #fff5e2;
 }
 
 .modal-header {
@@ -42,10 +47,6 @@ button:hover, a:hover {
     box-shadow: 0 0 2px rgba(0, 0, 0, 20%);
 }
 
-.side-bar {
-    border-top: 2px solid rgba(0, 0, 0, 0.05);
-}
-
 html, body {
     height: 100%;
 }
@@ -65,6 +66,15 @@ html, body {
 .side-bar {
     border: 1px solid #dcdbd6;
     height: 100%;
+    border-top: 2px solid rgba(0, 0, 0, 0.05);
+}
+
+.modal {
+    z-index: 1055; !important;
+}
+
+.modal-backdrop {
+    z-index: 0; !important;
 }
 
 .toolbar {
