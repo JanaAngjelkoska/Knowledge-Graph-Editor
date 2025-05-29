@@ -12,6 +12,7 @@ let currentEditingEntity = null;
 let currentlyConnectingFromEntity = null;
 let currentlyConnectingToEntity = null;
 let currentlyConnectingStatus = false;
+let snapToGrid = false;
 const labelColorMap = {};
 
 // confirmation messages
@@ -308,7 +309,15 @@ async function linkGraphToBackend(graph) {
 
 function loadGraph() {
     graph = $(go.Diagram, "graphDiv", {
-        "undoManager.isEnabled": true,
+        grid: $(go.Panel, "Grid",
+            {gridCellSize: new go.Size(10, 10)},
+            $(go.Shape, "LineH", {stroke: "#F3F4F3"}),
+            $(go.Shape, "LineV", {stroke: "#F3F4F3"})
+        ),
+        "draggingTool.isGridSnapEnabled": snapToGrid,
+        "resizingTool.isGridSnapEnabled": snapToGrid,
+        "rotatingTool.snapAngleMultiple": 15,
+        "rotatingTool.snapAngleEpsilon": 15,
         allowCopy: false,
         allowClipboard: false,
         "commandHandler.canCopySelection": () => false,
@@ -690,6 +699,14 @@ function resetAll() {
 }
 
 document.querySelector("#resetConnectingButton").addEventListener('click', resetAll);
+
+
+document.querySelector("#snapToGridSwitch").addEventListener('change', async (event) => {
+    snapToGrid = event.target.checked;
+
+    graph.toolManager.draggingTool.isGridSnapEnabled = snapToGrid;
+    graph.toolManager.resizingTool.isGridSnapEnabled = snapToGrid;
+});
 
 document.querySelector("#addRelationshipPropertyBtn").addEventListener("click", () => {
     const newLi = document.createElement("li");

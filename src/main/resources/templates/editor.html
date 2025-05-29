@@ -38,25 +38,36 @@
         </a>
     </nav>
 
-    <div class="toolbar fade-in p-2 d-flex align-items-center mb-1 rounded">
-        <button class="btn btn-sm btn-outline-secondary givefont me-2" id="add-node-btn" data-bs-toggle="modal"
-                data-bs-target="#addNodeModal">
-            <i class="bi bi-node-plus"></i> Add Node
-        </button>
-
-        <button class="btn btn-sm btn-outline-danger givefont" id="delete-btn">
-            <i class="bi bi-trash"></i> Delete Selection
-        </button>
-
-        <span class="pulse ms-3" id="statusCurrentlyConnectingTo" style="display: none">
-            <i class="bi bi-link-45deg m-1"></i>
-
-            In connect mode - Click a node to connect to |
-            <button class="btn btn-sm ms-1 btn-outline-danger" id="resetConnectingButton">
-                <i class="bi bi-stop" style="color: #8a0000;"></i>
-                Stop Connecting
+    <div class="toolbar fade-in p-2 d-flex justify-content-between align-items-center mb-1 rounded">
+        <div>
+            <button class="btn btn-sm btn-outline-secondary givefont me-2" id="add-node-btn" data-bs-toggle="modal"
+                    data-bs-target="#addNodeModal">
+                <i class="bi bi-node-plus"></i> Add Node
             </button>
-        </span>
+
+            <button class="btn btn-sm btn-outline-danger givefont" id="delete-btn">
+                <i class="bi bi-trash"></i> Delete Selection
+            </button>
+
+            <span class="pulse ms-3" id="statusCurrentlyConnectingTo" style="display: none">
+                <i class="bi bi-link-45deg m-1"></i>
+
+                In connect mode - Click a node to connect to |
+                <button class="btn btn-sm ms-1 btn-outline-danger" id="resetConnectingButton">
+                    <i class="bi bi-stop" style="color: #8a0000;"></i>
+                    Stop Connecting
+                </button>
+            </span>
+        </div>
+        <div class="d-flex align-self-end justify-content-end">
+            <div class="border border-1 px-2 py-1 border-dark rounded shadow-sm" style=" border: 1px solid #d9d9d9 !important;
+                background: #fff9eb;">
+                <div class="form-check form-switch">
+                    <input class="form-check-input text-yellow" type="checkbox" id="snapToGridSwitch">
+                    <label class="form-check-label" for="snapToGridSwitch">Snap nodes to grid</label>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="container-fluid fade-in py-2 mt-1">
