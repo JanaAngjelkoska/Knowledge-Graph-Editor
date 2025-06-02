@@ -1,8 +1,10 @@
-import {deleteEntity, enableConnectingStatus, showInfo, labelColorMap} from './editor.js';
+import {deleteEntity, enableConnectingStatus, labelColorMap, loadGraph, showInfo} from './editor.js';
 
 const $ = go.GraphObject.make;
 
 let snapToGrid = false;
+let curCellDim = 20;
+let curLayout = 'graph';
 
 const standardLayout = $(go.ForceDirectedLayout, {
     defaultSpringLength: 100,
@@ -287,32 +289,31 @@ export const contextMenuTemplateLink =
         )
     );
 
-export let graphSettings = {
-    grid: $(go.Panel, "Grid",
-        {gridCellSize: new go.Size(20, 20)},
-        $(go.Shape, "LineH", {stroke: "#ececec"}),
-        $(go.Shape, "LineV", {stroke: "#ececec"})
-    ),
-    "draggingTool.isGridSnapEnabled": snapToGrid,
-    "resizingTool.isGridSnapEnabled": snapToGrid,
-    "rotatingTool.snapAngleMultiple": 15,
-    "rotatingTool.snapAngleEpsilon": 15,
-    allowCopy: false,
-    allowClipboard: false,
-    "commandHandler.canCopySelection": () => false,
-    "commandHandler.canPasteSelection": () => false,
-    layout: layoutTypes['graph']
+export function graphSettingsCreate() {
+    return {
+        grid: $(go.Panel, "Grid",
+            { gridCellSize: new go.Size(curCellDim, curCellDim) },
+            $(go.Shape, "LineH", { stroke: "#ececec" }),
+            $(go.Shape, "LineV", { stroke: "#ececec" })
+        ),
+        "draggingTool.isGridSnapEnabled": document.querySelector("#snapToGridSwitch").checked,
+        "resizingTool.isGridSnapEnabled": document.querySelector("#snapToGridSwitch").checked,
+        "rotatingTool.snapAngleMultiple": 15,
+        "rotatingTool.snapAngleEpsilon": 15,
+        allowCopy: false,
+        allowClipboard: false,
+        "commandHandler.canCopySelection": () => false,
+        "commandHandler.canPasteSelection": () => false,
+        layout: layoutTypes[curLayout]
+    };
 }
 
 export function setLayout(layoutType) {
-    graphSettings.layout = layoutTypes[layoutType];
+    curLayout = layoutType;
+    loadGraph();
 }
 
 export function setGridDim(dim) {
-    graphSettings.grid =
-        $(go.Panel, "Grid",
-        {gridCellSize: new go.Size(dim, dim)},
-        $(go.Shape, "LineH", {stroke: "#ececec"}),
-        $(go.Shape, "LineV", {stroke: "#ececec"})
-    );
+    curCellDim = dim;
+    loadGraph();
 }

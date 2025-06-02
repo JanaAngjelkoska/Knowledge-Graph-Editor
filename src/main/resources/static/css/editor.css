@@ -8,7 +8,7 @@
     height: 100vh;
 }
 
-button:hover, a:hover, input:hover, .clickable {
+button:hover, a:hover, input:hover, .clickable:hover {
     cursor: url('/img/click.png') 0 0, auto; !important;
 }
 
@@ -24,9 +24,9 @@ button:hover, a:hover, input:hover, .clickable {
 .modal-header {
     height: 50px;
     border-bottom: 1px solid gray;
-    background-color: #FFFDF5FF;
+    background-color: #fff1e5;
     color: black;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 25%);
+    box-shadow: 0 1px 3px rgba(141, 105, 89, 0.2);
 }
 
 .custom-bg-col {

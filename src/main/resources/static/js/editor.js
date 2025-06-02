@@ -68,7 +68,12 @@ export async function linkGraphToBackend(graph) {
 }
 
 export function loadGraph() {
-    graph = $(go.Diagram, "graphDiv", GraphConfig.graphSettings);
+
+    if (graph) {
+        graph.div = null;
+    }
+
+    graph = $(go.Diagram, "graphDiv", GraphConfig.graphSettingsCreate());
 
     GraphConfig.graphPropsApply(graph);
     linkGraphToBackend(graph);

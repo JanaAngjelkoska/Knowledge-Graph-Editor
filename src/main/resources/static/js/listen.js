@@ -1,4 +1,5 @@
 import * as Requests from "./requests.js";
+import * as GraphConfig from './graphconf.js';
 import {
     loadGraph,
     linkGraphToBackend,
@@ -9,7 +10,20 @@ import {
     deleteButton, create_node_msg, create_rel_msg
 } from './editor.js';
 
+const cellSizeInput = document.getElementById('cellSize');
+const graphTypeLayout = document.getElementById('graphType');
+
 document.addEventListener("DOMContentLoaded", loadGraph);
+
+cellSizeInput.addEventListener('change', async () => {
+    GraphConfig.setGridDim(
+        parseInt(cellSizeInput.value)
+    );
+});
+
+graphTypeLayout.addEventListener('change', async () => {
+    GraphConfig.setLayout(graphTypeLayout.value.toLowerCase());
+});
 
 document.getElementById("createNodeBtn").addEventListener("click", async () => {
     const nodeLabels = document.getElementById("nodeLabels").value.trim();

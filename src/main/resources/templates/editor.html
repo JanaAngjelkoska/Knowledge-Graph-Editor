@@ -59,7 +59,12 @@
                 </button>
             </span>
         </div>
-        <div class="d-flex align-self-end justify-content-end">
+        <div class="d-flex align-self-end gap-1 justify-content-end">
+            <a class="d-flex align-items-center justify-content-center text-waning sidebar-header shadow-sm rounded"
+               data-bs-toggle="modal"
+               data-bs-target="#settingsModal">
+                <i class="bi bi-gear-wide text-secondary px-2 clickable"></i>
+            </a>
             <div class="px-2 py-1 rounded shadow-sm sidebar-header">
                 <div class="form-check form-switch">
                     <input class="form-check-input text-yellow" type="checkbox" id="snapToGridSwitch">
@@ -93,7 +98,7 @@
                     <hr>
 
                     <div class="properties d-flex flex-column align-items-center justify-content-center">
-                        <p class="text-center"><i class="bi fs-5 bi-gear me-1"></i>Properties</p>
+                        <p class="text-center d-flex justify-content-center align-items-center"><i class="bi fs-5 bi-gear-wide me-1"></i>Properties</p>
                         <ul class="list-unstyled d-flex flex-column justify-content-center" id="properties-list">
                         </ul>
                         <button class="btn btn-sm btn-outline-primary givefont save-changes-button">
@@ -126,6 +131,10 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                <div class="w-100 alert alert-info shadow-sm">
+                    <i class="bi bi-question-circle me-1"></i>
+                    <i class="fs-8">You are currently creating a new node.</i>
+                </div>
                 <div class="mb-3">
                     <label for="nodeLabels" class="form-label">Label</label>
                     <input type="text" class="form-control" id="nodeLabels" placeholder="Enter node label">
@@ -139,7 +148,7 @@
                             <i class="bi bi-question-circle text-secondary ms-1"
                                data-bs-toggle="tooltip"
                                data-bs-placement="right"
-                               title="You can put any key here, it does not matter.">
+                               title="You cannot edit this key. This key must be present to dictate what text is shown on the graph consistently.">
                             </i>
                         </label>
                         <input type="text" class="form-control" id="propertyKey"
@@ -187,14 +196,16 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-
                 <h5 class="modal-title" id="addRelationshipModalLabel"><i class="bi bi-link-45deg m-1"></i>Connect
                     Nodes
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-
             <div class="modal-body">
+                <div class="w-100 alert alert-info shadow-sm">
+                    <i class="bi bi-question-circle me-1"></i>
+                    <i class="fs-8">You are currently connecting 2 nodes.</i>
+                </div>
                 <form id="connect-nodes-form">
                     <div class="mb-3 clickable">
                         <label for="node1" class="form-label">Node 1</label>
@@ -241,6 +252,53 @@
                     <button type="button" class="btn form-btns clickable" id="createRelationshipBtn">Create Relationship
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- settings modal -->
+<div class="modal fade givefont" id="settingsModal" tabindex="-1"
+     aria-labelledby="settingsModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <h5 class="modal-title" id="settingsModalLabel">
+                    <i class="bi bi-gear-wide me-2"></i>Graph Settings
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="w-100 alert alert-info shadow-sm">
+                    <i class="bi bi-question-circle me-1"></i>
+                    <i class="fs-8">Settings are updated instantly.</i>
+                </div>
+                <div class="d-flex flex-column align-items-center justify-content-center gap-3">
+                    <div class="w-100 mt-2">
+                        <label for="cellSize" class="align-self-start my-1">
+                            <i class="bi bi-grid-3x3 me-1"></i> Grid cell size
+                        </label>
+                        <input id="cellSize" type="number" value="Grid Cell Width (px)" placeholder="123"
+                               class="form-control">
+                    </div>
+
+                    <div class="w-100">
+                        <label for="graphType" class="align-self-start my-1">
+                            <i class="bi bi-layers me-1"></i> Initial layout structure
+                        </label>
+                        <select class="form-select" id="graphType">
+                            <option id="graphTypeGraph" value="graph">Standard</option>
+                            <option id="treeTypeGraph" value="tree">Tree</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary clickable" data-bs-dismiss="modal">Close</button>
+                </button>
             </div>
         </div>
     </div>
