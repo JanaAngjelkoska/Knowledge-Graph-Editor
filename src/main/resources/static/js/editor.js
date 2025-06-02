@@ -1,296 +1,48 @@
-import {makeGet, makePatchJsonBody, makePostJsonBody, makePostPathVar} from './requests.js';
-
-// -----------------| UI SETUP & GLOBAL VAR SETUP |-----------------
-
-// graph
+import * as Requests from './requests.js';
+import * as GraphConfig from "./graphconf.js";
 
 const $ = go.GraphObject.make;
-const deleteButton = document.getElementById('delete-btn');
-let graph;
+
+// ================== --------------------------- =================
+// ================= |    Export assignments    | =================
+// ================== -------------------------- =================
+
+export let graph;
+export const deleteButton = document.getElementById('delete-btn');
+export let killConnectionButton = document.getElementById('resetConnectingButton');
+export let create_rel_msg = document.querySelector('.confirmation-message-create-rel')
+export let create_node_msg = document.querySelector('.confirmation-message-create')
+export const labelColorMap = {};
+
+// ================== --------------------------- =================
+// ================= |    Local  assignments    | =================
+// ================== -------------------------- =================
+
 let editedProperties = {};
+
 let currentEditingEntity = null;
 let currentlyConnectingFromEntity = null;
 let currentlyConnectingToEntity = null;
 let currentlyConnectingStatus = false;
-let snapToGrid = false;
-const labelColorMap = {};
 
-// confirmation messages
-let create_rel_msg = document.querySelector('.confirmation-message-create-rel')
 let save_changes_msg = document.querySelector('.confirmation-message')
-let create_node_msg = document.querySelector('.confirmation-message-create')
 
-function randomColor() {
-    const hue = Math.floor(Math.random() * 360);
-    const saturation = Math.floor(Math.random() * 10) + 30;
-    const lightness = Math.floor(Math.random() * 20) + 70;
-    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+// ================== --------------------------- =================
+// ================= |     Export functions     | =================
+// ================== -------------------------- =================
+
+export function killConnectingState() {
+    document.getElementById("statusCurrentlyConnectingTo").style.display = 'none';
+    currentlyConnectingFromEntity = null;
+    currentlyConnectingToEntity = null;
+    currentEditingEntity = null;
+    currentlyConnectingStatus = false;
 }
 
-function colorForLabel(label) {
-    if (!labelColorMap[label]) {
-        labelColorMap[label] = {
-            fill: randomColor(),
-            stroke: randomColor()
-        };
-    }
+export async function linkGraphToBackend(graph) {
 
-    return labelColorMap[label];
-}
-
-const contextMenuTemplateNode =
-    $("ContextMenu",
-        $("ContextMenuButton",
-            $(go.Panel, "Horizontal",
-                {padding: 5},
-                $(go.Picture,
-                    {
-                        source: "/img/details.svg",
-                        width: 16, height: 16
-                    }
-                ),
-                $(go.TextBlock, "Details",
-                    {
-                        font: "14px Montserrat",
-                        stroke: "#333",
-                        margin: new go.Margin(2, 8, 2, 8),
-                        name: "DETAILS_TEXT"
-                    }
-                )
-            ),
-            {
-                "ButtonBorder.fill": "#f0f0f0",
-                "ButtonBorder.stroke": "#ccc",
-                mouseEnter: (e, obj) => obj.findObject("DETAILS_TEXT").stroke = "#000",
-                mouseLeave: (e, obj) => obj.findObject("DETAILS_TEXT").stroke = "#333",
-                click: (e, obj) => {
-                    const contextPart = obj.part.adornedPart;
-                    if (contextPart instanceof go.Node) {
-                        showInfo(contextPart.data, "Node");
-                    } else if (contextPart instanceof go.Link) {
-                        showInfo(contextPart.data, "Relationship");
-                    }
-                }
-            }
-        ),
-        $("ContextMenuButton",
-            $(go.Panel, "Horizontal",
-                {padding: 5},
-                $(go.Picture,
-                    {
-                        source: "/img/connect.svg",
-                        width: 16, height: 16
-                    }
-                ),
-                $(go.TextBlock, "Connect",
-                    {
-                        font: "14px Montserrat",
-                        stroke: "#333",
-                        margin: new go.Margin(2, 8, 2, 8),
-                        name: "DETAILS_TEXT"
-                    }
-                )
-            ),
-            {
-                "ButtonBorder.fill": "#f0f0f0",
-                "ButtonBorder.stroke": "#ccc",
-                mouseEnter: (e, obj) => obj.findObject("DETAILS_TEXT").stroke = "#000",
-                mouseLeave: (e, obj) => obj.findObject("DETAILS_TEXT").stroke = "#333",
-                click: (e, obj) => {
-                    const contextPart = obj.part.adornedPart;
-                    if (contextPart instanceof go.Node) {
-
-                        currentlyConnectingStatus = true;
-
-                        let statusConnectingTo = document.getElementById('statusCurrentlyConnectingTo');
-
-                        statusConnectingTo.style.display = '';
-
-                        showInfo(contextPart.data, "Node");
-
-                    } else if (contextPart instanceof go.Link) {
-                        showInfo(contextPart.data, "Relationship");
-                    }
-                }
-            }
-        ),
-        $("ContextMenuButton",
-            $(go.Panel, "Horizontal",
-                {padding: 5},
-                $(go.Picture,
-                    {
-                        source: "/img/delete.svg",
-                        width: 16, height: 16
-                    }
-                ),
-                $(go.TextBlock, "Delete",
-                    {
-                        font: "14px Montserrat",
-                        stroke: "#333",
-                        margin: new go.Margin(2, 8, 2, 8),
-                        name: "DELETE_TEXT"
-                    }
-                )
-            ),
-            {
-                "ButtonBorder.fill": "#f0f0f0",
-                "ButtonBorder.stroke": "#ccc",
-                mouseEnter: (e, obj) => obj.findObject("DELETE_TEXT").stroke = "#d00",
-                mouseLeave: (e, obj) => obj.findObject("DELETE_TEXT").stroke = "#333",
-                click: (e, obj) => {
-                    const contextPart = obj.part.adornedPart;
-                    if (contextPart) {
-                        deleteEntity();
-                    }
-                }
-            }
-        )
-    );
-
-const contextMenuTemplateLink =
-    $("ContextMenu",
-        $("ContextMenuButton",
-            $(go.Panel, "Horizontal",
-                {padding: 5},
-                $(go.Picture,
-                    {
-                        source: "/img/details.svg",
-                        width: 16, height: 16
-                    }
-                ),
-                $(go.TextBlock, "Details",
-                    {
-                        font: "14px Montserrat",
-                        stroke: "#333",
-                        margin: new go.Margin(2, 8, 2, 8),
-                        name: "DETAILS_TEXT"
-                    }
-                )
-            ),
-            {
-                "ButtonBorder.fill": "#f0f0f0",
-                "ButtonBorder.stroke": "#ccc",
-                mouseEnter: (e, obj) => obj.findObject("DETAILS_TEXT").stroke = "#000",
-                mouseLeave: (e, obj) => obj.findObject("DETAILS_TEXT").stroke = "#333",
-                click: (e, obj) => {
-                    const contextPart = obj.part.adornedPart;
-                    if (contextPart instanceof go.Node) {
-                        showInfo(contextPart.data, "Node");
-                    } else if (contextPart instanceof go.Link) {
-                        showInfo(contextPart.data, "Relationship");
-                    }
-                }
-            }
-        ),
-        $("ContextMenuButton",
-            $(go.Panel, "Horizontal",
-                {padding: 5},
-                $(go.Picture,
-                    {
-                        source: "/img/delete.svg",
-                        width: 16, height: 16
-                    }
-                ),
-                $(go.TextBlock, "Delete",
-                    {
-                        font: "14px Montserrat",
-                        stroke: "#333",
-                        margin: new go.Margin(2, 8, 2, 8),
-                        name: "DELETE_TEXT"
-                    }
-                )
-            ),
-            {
-                "ButtonBorder.fill": "#f0f0f0",
-                "ButtonBorder.stroke": "#ccc",
-                mouseEnter: (e, obj) => obj.findObject("DELETE_TEXT").stroke = "#d00",
-                mouseLeave: (e, obj) => obj.findObject("DELETE_TEXT").stroke = "#333",
-                click: (e, obj) => {
-                    const contextPart = obj.part.adornedPart;
-                    if (contextPart) {
-                        deleteEntity();
-                    }
-                }
-            }
-        )
-    );
-
-function graphProps(graph) {
-    graph.nodeTemplate =
-        $(go.Node, "Auto",
-            {
-                contextMenu: contextMenuTemplateNode
-            },
-            $(go.Shape, "Circle",
-                {
-                    strokeWidth: 2,
-                    width: 90,
-                    height: 90
-                },
-                new go.Binding("fill", "label", label => colorForLabel(label).fill),
-                new go.Binding("stroke", "label", () => "#000")
-            ),
-            $(go.TextBlock, {
-                    font: "light 30px Montserrat",
-                    textAlign: "center",
-                    stroke: "black",
-                    wrap: go.TextBlock.WrapFit,
-
-                    maxSize: new go.Size(60, NaN),
-                    overflow: go.TextBlock.OverflowClip,
-                    verticalAlignment: go.Spot.Center
-                },
-                new go.Binding("text", "text")
-            )
-        );
-
-    graph.linkTemplate =
-        $(go.Link,
-            {
-                routing: go.Link.Normal,
-                curve: go.Link.Bezier,
-                adjusting: go.Link.Stretch,
-                relinkableFrom: true,
-                relinkableTo: true,
-                contextMenu: contextMenuTemplateLink,
-                reshapable: true,
-                resegmentable: true,
-
-            },
-            $(go.Shape, {strokeWidth: 3, stroke: "#000"}),
-            $(go.Shape, {toArrow: "Standard", stroke: null, fill: "#000"}),
-            $(go.Panel, "Auto",
-                $(go.Shape, "RoundedRectangle", {
-                    fill: "#000",
-                    strokeWidth: 0
-                }),
-                $(go.TextBlock,
-                    {
-                        margin: new go.Margin(1, 2),
-                        font: "light 18px Montserrat",
-                        stroke: "white",
-                        editable: false,
-                        wrap: go.TextBlock.WrapFit,
-                        overflow: go.TextBlock.OverflowEllipsis
-                    },
-                    new go.Binding("text", "text")
-                )
-            )
-        );
-
-
-    graph.commandHandler.deletesTree = false;
-    graph.commandHandler.canDeleteSelection = function () {
-        return false;
-    };
-}
-
-// -----------------| FUNCTIONALITY |-----------------
-
-async function linkGraphToBackend(graph) {
-
-    const nodes = await makeGet("api/nodes");
-    const edges = await makeGet("api/relationships");
+    const nodes = await Requests.makeGet("api/nodes");
+    const edges = await Requests.makeGet("api/relationships");
 
     const nodeDataArray = nodes.map(node => ({
         key: node.properties.id,
@@ -315,29 +67,10 @@ async function linkGraphToBackend(graph) {
 
 }
 
-function loadGraph() {
-    graph = $(go.Diagram, "graphDiv", {
-        grid: $(go.Panel, "Grid",
-            {gridCellSize: new go.Size(20, 20)},
-            $(go.Shape, "LineH", {stroke: "#ececec"}),
-            $(go.Shape, "LineV", {stroke: "#ececec"})
-        ),
-        "draggingTool.isGridSnapEnabled": snapToGrid,
-        "resizingTool.isGridSnapEnabled": snapToGrid,
-        "rotatingTool.snapAngleMultiple": 15,
-        "rotatingTool.snapAngleEpsilon": 15,
-        allowCopy: false,
-        allowClipboard: false,
-        "commandHandler.canCopySelection": () => false,
-        "commandHandler.canPasteSelection": () => false,
-        layout: $(go.ForceDirectedLayout, {
-            defaultSpringLength: 100,
-            defaultElectricalCharge: 1500,
-            maxIterations: 200000
-        })
-    });
+export function loadGraph() {
+    graph = $(go.Diagram, "graphDiv", GraphConfig.graphSettings);
 
-    graphProps(graph);
+    GraphConfig.graphPropsApply(graph);
     linkGraphToBackend(graph);
 
     graph.addDiagramListener("ObjectSingleClicked", function (e) {
@@ -355,7 +88,7 @@ function loadGraph() {
     });
 }
 
-function showInfo(data, type) {
+export function showInfo(data, type) {
     const sidebar = document.querySelector(".side-bar");
     const props = data.properties || {};
 
@@ -367,6 +100,50 @@ function showInfo(data, type) {
 
     showPropertiesForAllTypes(sidebar, data, props, type)
 }
+
+export async function deleteEntity() {
+    const selectedEntity = graph.selection.first();
+    let currentEntityType = ""
+
+    if (selectedEntity instanceof go.Node) {
+        currentEntityType = "Node"
+    } else if (selectedEntity instanceof go.Link) {
+        currentEntityType = "Relationship"
+    }
+
+    if (selectedEntity) {
+        const confirmation = confirm("Are you sure you want to delete the selected entity? It may cascade to related relationships.");
+        if (confirmation) {
+            try {
+                if (currentEntityType === "Node") {
+                    graph.commandHandler.deleteSelection();
+                    const nodeId = selectedEntity.data.key;
+                    await Requests.makePostPathVar(nodeId, "api/nodes/delete");
+
+                } else if (currentEntityType === "Relationship") {
+                    graph.commandHandler.deleteSelection();
+                    const relationshipId = selectedEntity.data.id;
+                    await Requests.makePostPathVar(relationshipId, "api/relationships/delete");
+                }
+
+                await linkGraphToBackend(graph);
+
+            } catch (error) {
+                console.error("Error during deletion: ", error);
+            }
+        }
+    } else {
+        alert("Please select a node or relationship to delete.");
+    }
+}
+
+export function enableConnectingStatus() {
+    currentlyConnectingStatus = true;
+}
+
+// ================== --------------------- =================
+// ================= | Std. Functionality | ==================
+// ================== -------------------- =================
 
 function showLabelForNode(sidebar, data, props) {
     sidebar.querySelector(".display-class").textContent = data.label || "Unnamed Node";
@@ -393,6 +170,7 @@ function showPropertiesForAllTypes(sidebar, data, props, type) {
     propertiesList.innerHTML = "";
 
     editedProperties = {};
+
     if (type === "Node") {
 
         if (currentlyConnectingFromEntity !== null) {
@@ -541,7 +319,7 @@ async function callEditEntityProperties(currentEditingEntity, updatedProperties,
         link_call = `api/relationships/edit/${currentEditingEntity.id}`
 
     try {
-        await makePatchJsonBody(updatedProperties, link_call)
+        await Requests.makePatchJsonBody(updatedProperties, link_call)
         save_changes_msg.innerHTML = `
         <i class="bi bi-check-circle me"></i>
         <span>Changes saved</span>
@@ -549,42 +327,6 @@ async function callEditEntityProperties(currentEditingEntity, updatedProperties,
         await linkGraphToBackend(graph);
     } catch (error) {
         console.error("Error occurred while updating properties: ", error);
-    }
-}
-
-async function deleteEntity() {
-    const selectedEntity = graph.selection.first();
-    let currentEntityType = ""
-
-    if (selectedEntity instanceof go.Node) {
-        currentEntityType = "Node"
-    } else if (selectedEntity instanceof go.Link) {
-        currentEntityType = "Relationship"
-    }
-
-    if (selectedEntity) {
-        const confirmation = confirm("Are you sure you want to delete the selected entity? It may cascade to related relationships.");
-        if (confirmation) {
-            try {
-                if (currentEntityType === "Node") {
-                    graph.commandHandler.deleteSelection();
-                    const nodeId = selectedEntity.data.key;
-                    await makePostPathVar(nodeId, "api/nodes/delete");
-
-                } else if (currentEntityType === "Relationship") {
-                    graph.commandHandler.deleteSelection();
-                    const relationshipId = selectedEntity.data.id;
-                    await makePostPathVar(relationshipId, "api/relationships/delete");
-                }
-
-                await linkGraphToBackend(graph);
-
-            } catch (error) {
-                console.error("Error during deletion: ", error);
-            }
-        }
-    } else {
-        alert("Please select a node or relationship to delete.");
     }
 }
 
@@ -623,155 +365,3 @@ function openAddRelationshipModal() {
     const modal = new bootstrap.Modal(document.getElementById('addRelationshipModal'));
     modal.show();
 }
-
-// -----------------| LISTENERS |-----------------
-
-document.addEventListener("DOMContentLoaded", loadGraph);
-
-document.getElementById("createNodeBtn").addEventListener("click", async () => {
-    const nodeLabels = document.getElementById("nodeLabels").value.trim();
-    const properties = {};
-
-    const firstKey = document.getElementById("propertyKey").value.trim();
-    const firstValue = document.getElementById("propertyValue").value.trim();
-    if (firstKey && firstValue) {
-        properties[firstKey] = firstValue;
-    }
-
-    document.querySelectorAll("#propertyList li").forEach(li => {
-        const key = li.querySelector(".property-key").value.trim();
-        properties[key] = li.querySelector(".property-value").value.trim();
-    });
-
-    if (nodeLabels && Object.keys(properties).length > 0) {
-        try {
-            const postData = {
-                labels: [nodeLabels],
-                properties: properties
-            };
-
-            console.log(properties)
-
-            await makePostJsonBody(postData, "api/nodes/create");
-            create_node_msg.innerHTML = `
-                <i class="bi bi-check-circle"></i>
-                <span class="me-1">Node Created.</span>
-            `
-            await linkGraphToBackend(graph);
-
-        } catch (error) {
-            console.error('Error during node creation:', error);
-        }
-    } else {
-        alert("Please enter a label and at least one property.");
-    }
-});
-
-document.getElementById("createRelationshipBtn").addEventListener("click", async () => {
-    const fromNodeId = document.getElementById("node1").value.trim();
-    const toNodeId = document.getElementById("node2").value.trim();
-    const relationshipType = document.getElementById("relationshipType").value.trim();
-    const properties = {};
-
-    document.querySelectorAll("#relationshipPropertyList li").forEach(li => {
-        const key = li.querySelector(".relationship-property-key")?.value.trim();
-        const value = li.querySelector(".relationship-property-value")?.value.trim();
-        if (key && value) {
-            properties[key] = value;
-        }
-    });
-
-    if (fromNodeId && toNodeId && relationshipType && Object.keys(properties).length >= 0) {
-        try {
-            const postData = {
-                startNodeId: fromNodeId,
-                endNodeId: toNodeId,
-                relationshipType: relationshipType.toString().trim(),
-                properties: properties
-            };
-
-            await makePostJsonBody(postData, `api/relationships/create/${fromNodeId}/${toNodeId}`);
-            create_rel_msg.innerHTML = `
-                <i class="bi bi-check-circle"></i>
-                <span class="me-1">Relationship Created.</span>
-            `
-            await linkGraphToBackend(graph);
-
-
-        } catch (error) {
-            console.error('Error during relationship creation:', error);
-        }
-    } else {
-        alert("Please fill in all fields and at least one property.");
-    }
-
-    resetAll();
-
-});
-
-function resetAll() {
-    document.getElementById("statusCurrentlyConnectingTo").style.display = 'none';
-    currentlyConnectingFromEntity = null;
-    currentlyConnectingToEntity = null;
-    currentEditingEntity = null;
-    currentlyConnectingStatus = false;
-}
-
-document.querySelector("#resetConnectingButton").addEventListener('click', resetAll);
-
-
-document.querySelector("#snapToGridSwitch").addEventListener('change', async (event) => {
-    snapToGrid = event.target.checked;
-
-    graph.toolManager.draggingTool.isGridSnapEnabled = snapToGrid;
-    graph.toolManager.resizingTool.isGridSnapEnabled = snapToGrid;
-});
-
-document.querySelector("#addRelationshipPropertyBtn").addEventListener("click", () => {
-    const newLi = document.createElement("li");
-    newLi.classList.add("d-flex", "gap-2", "mb-2");
-
-    newLi.innerHTML = `
-        <div class="mb-3">
-            <label class="form-label">Key</label>
-            <input type="text" class="relationship-property-key form-control" placeholder="Enter property key" />
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Value</label>
-            <input type="text" class="relationship-property-value form-control" placeholder="Enter property value" />
-        </div>
-        <span>
-            <i class="bi bi-trash mx-1 delete-property-btn" style="cursor: pointer; color: dimgray; font-size: 1.3rem;"></i>
-        </span>
-    `;
-
-    document.getElementById("relationshipPropertyList").appendChild(newLi);
-
-    newLi.querySelector(".delete-property-btn").addEventListener("click", () => {
-        newLi.remove();
-    });
-});
-
-document.querySelector(".add-property-btn").addEventListener("click", () => {
-    const newLi = document.createElement("li");
-    newLi.innerHTML = `
-        <div class="mb-3">
-            <label class="form-label">Key</label>
-            <input type="text" class="property-key form-control" placeholder="Enter property key" />
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Value</label>
-            <input type="text" class="property-value form-control" placeholder="Enter property value" />
-        </div>
-        <span>
-            <i class="bi bi-trash mx-1 delete-property-btn" style="cursor: pointer; color: dimgray; font-size: 1.3rem;"></i>
-        </span>
-    `;
-    document.getElementById("propertyList").appendChild(newLi);
-
-    newLi.querySelector(".delete-property-btn").addEventListener("click", () => {
-        newLi.remove();
-    });
-});
-
-deleteButton.addEventListener('click', deleteEntity);

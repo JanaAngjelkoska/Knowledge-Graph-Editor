@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="./css/editor.css">
 
-    <link rel="icon" type="image/png" href="/img/favicon.png" sizes="256x256">
+    <link rel="icon" type="image/png" href="/img/favicon.png" sizes="64x64">
 </head>
 <body class="custom-bg-col">
 
@@ -79,7 +79,7 @@
 
                     <hr>
 
-                    <div class="d-flex align-items-center justify-content-center gap-1 ">
+                    <div class="d-flex align-items-center justify-content-center     gap-1 ">
                         <span><i class="bi bi-eye me-1 fs-5"></i></span>
                         <span class="display-name badge d-flex align-items-center text-bg-dark"
                               style="font-weight: bolder"></span>
@@ -196,12 +196,12 @@
 
             <div class="modal-body">
                 <form id="connect-nodes-form">
-                    <div class="mb-3">
+                    <div class="mb-3 clickable">
                         <label for="node1" class="form-label">Node 1</label>
                         <select class="form-select" id="node1" required>
                         </select>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-3 clickable">
                         <label for="node2" class="form-label">Node 2</label>
                         <select class="form-select" id="node2" required>
                         </select>
@@ -209,7 +209,7 @@
 
                     <div class="relType">
                         <div class="mb-3">
-                            <label for="relationshipType" class="form-label">
+                            <label for="relationshipType" class="form-label clickable">
                                 Relationship Type
                                 <i class="bi bi-question-circle text-secondary ms-1"
                                    data-bs-toggle="tooltip"
@@ -218,7 +218,7 @@
                                    The string you input here will display on the relationship.">
                                 </i>
                             </label>
-                            <input type="text" class="form-control" id="relationshipType"
+                            <input type="text" class="form-control clickable" id="relationshipType"
                                    placeholder="Enter relationship type">
                         </div>
                     </div>
@@ -226,10 +226,10 @@
                     <div class="propertiesRel">
                         <ul class="list-unstyled mt-3" id="relationshipPropertyList">
                         </ul>
-                        <span id="addRelationshipPropertyBtn">
+                        <span id="addRelationshipPropertyBtn" class="clickable">
                             <i class="bi bi-plus-circle-dotted mx-1 add-property-btn"
                                style="cursor: url('img/click.png') 0 0, auto; color: dimgray; font-size: 1.3rem;">
-                                <span class="add-new-msg clickable">Add a new property</span>
+                                <span class="add-new-msg clickable ">Add a new property</span>
                             </i>
                         </span>
                     </div>
@@ -237,8 +237,8 @@
 
                 <div class="modal-footer">
                     <div class="confirmation-message-create-rel"></div>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn form-btns" id="createRelationshipBtn">Create Relationship
+                    <button type="button" class="btn btn-secondary clickable" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn form-btns clickable" id="createRelationshipBtn">Create Relationship
                     </button>
                 </div>
             </div>
@@ -249,6 +249,8 @@
 <!-- scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://unpkg.com/gojs/release/go.js"></script>
-<script type="module" src="./js/editor.js"></script>
+<script type="module" src="/js/editor.js"></script>
+<script type="module" src="/js/listen.js"></script>
+<script type="module" src="/js/graphconf.js"></script>
 </body>
 </html>
