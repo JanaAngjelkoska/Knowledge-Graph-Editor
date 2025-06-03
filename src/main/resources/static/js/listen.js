@@ -11,7 +11,8 @@ import {
 } from './editor.js';
 
 const cellSizeInput = document.getElementById('cellSize');
-const graphTypeLayout = document.getElementById('graphType');
+const graphTypeLayoutItems = document.querySelectorAll('.dropdown-item');
+
 
 document.addEventListener("DOMContentLoaded", loadGraph);
 
@@ -21,8 +22,20 @@ cellSizeInput.addEventListener('change', async () => {
     );
 });
 
-graphTypeLayout.addEventListener('change', async () => {
-    GraphConfig.setLayout(graphTypeLayout.value.toLowerCase());
+
+graphTypeLayoutItems.forEach(item => {
+    item.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const selectedLayout = item.getAttribute('data-value');
+
+        const graphTypeButton = document.getElementById('graphType');
+
+        graphTypeButton.innerHTML = item.innerHTML;
+
+        GraphConfig.setLayout(
+            selectedLayout.toLowerCase()
+        );
+    });
 });
 
 document.getElementById("createNodeBtn").addEventListener("click", async () => {

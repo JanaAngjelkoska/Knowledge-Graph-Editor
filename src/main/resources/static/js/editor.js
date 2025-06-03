@@ -237,7 +237,7 @@ function createPropertyInput(key, value, data, type, disable) {
         <span class="d-inline-block text-center" style="width: 5%;">→</span>
         <input type="text" style="width: 40%" value="${value}" placeholder="Value" class="d-inline-block form-control value-input form-control-sm"/>
         <span class="d-inline-block text-center delete-btn" style="width: 5%; cursor: url('/img/click.png') 0 0, auto; color: dimgray; font-size: 1.3rem;">
-            <i class="bi bi-trash"></i>
+            <i class="bi bi-trash clickable"></i>
         </span>
         `;
 

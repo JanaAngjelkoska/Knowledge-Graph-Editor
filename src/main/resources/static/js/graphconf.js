@@ -313,6 +313,8 @@ export function setLayout(layoutType) {
     loadGraph();
 }
 
+
+
 export function setGridDim(dim) {
     curCellDim = dim;
     loadGraph();

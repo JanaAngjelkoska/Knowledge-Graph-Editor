@@ -98,11 +98,12 @@
                     <hr>
 
                     <div class="properties d-flex flex-column align-items-center justify-content-center">
-                        <p class="text-center d-flex justify-content-center align-items-center"><i class="bi fs-5 bi-gear-wide me-1"></i>Properties</p>
+                        <p class="text-center d-flex justify-content-center align-items-center"><i
+                                class="bi fs-5 bi-gear-wide me-1"></i>Properties</p>
                         <ul class="list-unstyled d-flex flex-column justify-content-center" id="properties-list">
                         </ul>
-                        <button class="btn btn-sm btn-outline-primary givefont save-changes-button">
-                            <i class="bi bi-save2 me-1"></i>
+                        <button class="btn btn-sm btn-outline-primary align-self-start givefont save-changes-button">
+                            <i class="bi bi-save2 me-1 clickable"></i>
                             Save changes
                         </button>
 
@@ -266,7 +267,7 @@
             <div class="modal-header">
 
                 <h5 class="modal-title" id="settingsModalLabel">
-                    <i class="bi bi-gear-wide me-2"></i>Graph Settings
+                    <i class="bi bi-gear-wide me-2"></i>Additional Settings
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -288,10 +289,26 @@
                         <label for="graphType" class="align-self-start my-1">
                             <i class="bi bi-layers me-1"></i> Initial layout structure
                         </label>
-                        <select class="form-select" id="graphType">
-                            <option id="graphTypeGraph" value="graph">Standard</option>
-                            <option id="treeTypeGraph" value="tree">Tree</option>
-                        </select>
+                        <div class="dropdown w-100">
+                            <button class="btn text-left w-100 btn-outline-secondary dropdown-toggle"
+                                    id="graphType" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="align-self-start text-left w-100">
+                                    Select Graph Type
+                                </span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item text-left" href="#" data-value="tree">
+                                        <i class="bi bi-diagram-3 me-1"></i> Tree
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item text-left" href="#" data-value="graph">
+                                        <i class="bi bi-bounding-box-circles me-1"></i> Graph
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
