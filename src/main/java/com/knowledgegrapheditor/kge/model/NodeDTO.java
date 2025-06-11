@@ -33,4 +33,12 @@ public class NodeDTO {
                 ", properties=" + properties.toString() +
                 '}';
     }
+
+    public void setLabels(Iterable<String> labels) {
+        this.labels = labels;
+    }
+
+    public void setProperties(Map<String, Object> properties) {
+        this.properties = properties;
+    }
 }

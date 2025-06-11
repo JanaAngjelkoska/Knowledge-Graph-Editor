@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="./css/editor.css">
 
     <link rel="icon" type="image/png" href="/img/favicon.png" sizes="64x64">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 </head>
 <body class="custom-bg-col">
 
@@ -47,6 +50,11 @@
 
             <button class="btn btn-sm btn-outline-danger givefont" id="delete-btn">
                 <i class="bi bi-trash"></i> Delete Selection
+            </button>
+
+            <button class="btn btn-sm btn-outline-secondary givefont me-2" id="explore-nodes-btn" data-bs-toggle="modal"
+                    data-bs-target="#exploreNodes">
+                <i class="bi bi-node-plus"></i> Explore graph
             </button>
 
             <span class="pulse ms-3" id="statusCurrentlyConnectingTo" style="display: none">
@@ -321,11 +329,137 @@
     </div>
 </div>
 
+
+<!-- Modal -->
+<div class="modal fade" id="exploreNodes" tabindex="-1" aria-labelledby="exploreNodesLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exploreNodesLabel">Explore Graph Nodes</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="dropdown1" class="form-label">Select Node 1:</label>
+                            <select id="dropdown1" class="form-select"></select>
+                            <div id="node1-info" class="card mt-3 p-3 bg-light">
+                                <h6>Node Information</h6>
+                                <div class="node-details">
+                                    <p class="mb-1"><strong>Labels:</strong> <span id="node1-labels">-</span></p>
+                                    <p class="mb-1"><strong>Properties:</strong> <span id="node1-properties">-</span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="dropdown2" class="form-label">Select Node 2:</label>
+                            <select id="dropdown2" class="form-select"></select>
+                            <div id="node2-info" class="card mt-3 p-3 bg-light">
+                                <h6>Node Information</h6>
+                                <div class="node-details">
+                                    <p class="mb-1"><strong>Labels:</strong> <span id="node2-labels">-</span></p>
+                                    <p class="mb-1"><strong>Properties:</strong> <span id="node2-properties">-</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn form-btns" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary">Save changes</button>
+                <button type="button" class="btn form-btns">Create relationship</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <!-- scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://unpkg.com/gojs/release/go.js"></script>
 <script type="module" src="/js/editor.js"></script>
 <script type="module" src="/js/listen.js"></script>
 <script type="module" src="/js/graphconf.js"></script>
+
+
+<script>
+    function loadNodeDropdown() {
+        fetch('/api/nodes/dropdown')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not OK');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const dropdown1 = document.getElementById('dropdown1');
+                const dropdown2 = document.getElementById('dropdown2');
+
+                dropdown1.innerHTML = '<option value="">Select a node</option>';
+                dropdown2.innerHTML = '<option value="">Select a node</option>';
+
+                data.forEach(item => {
+                    const option1 = document.createElement('option');
+                    option1.value = JSON.stringify(item);
+                    option1.textContent = item.display;
+
+                    const option2 = option1.cloneNode(true);
+
+                    dropdown1.appendChild(option1);
+                    dropdown2.appendChild(option2);
+                });
+
+                dropdown1.addEventListener('change', (e) => {
+                    updateNodeInfo(e.target.value, 'node1');
+                });
+
+                dropdown2.addEventListener('change', (e) => {
+                    updateNodeInfo(e.target.value, 'node2');
+                });
+
+                if ($().select2) {
+                    $('#dropdown1').select2({
+                        placeholder: "Select a node",
+                        width: '100%'
+                    });
+                    $('#dropdown2').select2({
+                        placeholder: "Select a node",
+                        width: '100%'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error loading nodes:', error);
+            });
+    }
+
+    function updateNodeInfo(selectedValue, nodePrefix) {
+        if (!selectedValue) {
+            document.getElementById(`${nodePrefix}-labels`).textContent = '-';
+            document.getElementById(`${nodePrefix}-properties`).textContent = '-';
+            return;
+        }
+
+        try {
+            const nodeData = JSON.parse(selectedValue);
+            document.getElementById(`${nodePrefix}-labels`).textContent = nodeData.label || '-';
+
+            const properties = nodeData.display.includes(', ')
+                ? nodeData.display.split(', ')[1]
+                : 'No properties';
+            document.getElementById(`${nodePrefix}-properties`).textContent = properties;
+        } catch (e) {
+            console.error('Error parsing node data:', e);
+        }
+    }
+
+    document.getElementById('exploreNodes').addEventListener('shown.bs.modal', loadNodeDropdown);
+
+</script>
+
+
 </body>
 </html>

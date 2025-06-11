@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @RestController
 @RequestMapping("/api/nodes")
@@ -67,6 +69,38 @@ public class NodeApiController {
         Optional<NodeDTO> result = nodeService.deleteProperty(id, propertyKey);
         return result.isPresent() ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
+
+
+    @GetMapping("/dropdown")
+    public List<Map<String, String>> getAllNodeDropdownOptions() {
+        Iterable<NodeDTO> nodes = nodeService.findAll();
+        System.out.println("Called");
+        System.out.println(nodes);
+        return StreamSupport.stream(nodes.spliterator(), false)
+                .sorted(Comparator.comparing(node -> {
+                    Iterator<String> it = node.getLabels().iterator();
+                    return it.hasNext() ? it.next() : "";
+                }))
+                .map(node -> {
+                    String labelPart = String.join("/", node.getLabels());
+                    String propertyPart = node.getProperties().entrySet().stream()
+                            .filter(entry -> !"id".equalsIgnoreCase(entry.getKey()))
+                            .map(entry -> entry.getValue().toString())
+                            .collect(Collectors.joining(", "));
+
+                    String display = propertyPart.isEmpty() ? labelPart : labelPart + ", " + propertyPart;
+
+                    Map<String, String> option = new HashMap<>();
+                    option.put("label", labelPart);
+                    option.put("display", display);
+                    option.put("value", node.getProperties().get("id").toString());
+                    return option;
+                })
+                .collect(Collectors.toList());
+    }
+
+
+
 }
 
 
