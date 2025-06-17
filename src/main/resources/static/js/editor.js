@@ -12,6 +12,7 @@ export const deleteButton = document.getElementById('delete-btn');
 export let killConnectionButton = document.getElementById('resetConnectingButton');
 export let create_rel_msg = document.querySelector('.confirmation-message-create-rel')
 export let create_node_msg = document.querySelector('.confirmation-message-create')
+export let filteringNodes = false;
 export const labelColorMap = {};
 
 // ================== --------------------------- =================
@@ -41,7 +42,19 @@ export function killConnectingState() {
 
 export async function linkGraphToBackend(graph) {
 
-    const nodes = await Requests.makeGet("api/nodes");
+    let nodes;
+
+    if (GraphConfig.filteringNodes) {
+        const name = document.querySelector('#nodeFilter').value;
+        if (name === null || name.toString().trim() === "") {
+            nodes = await Requests.makeGet("api/nodes");
+        } else {
+            nodes = await Requests.makeGetPathVar(name, 'api/nodes/filtering');
+        }
+        GraphConfig.setFilteringNodeStat(false);
+    } else {
+        nodes = await Requests.makeGet("api/nodes");
+    }
     const edges = await Requests.makeGet("api/relationships");
 
     const nodeDataArray = nodes.map(node => ({
@@ -64,7 +77,6 @@ export async function linkGraphToBackend(graph) {
     graph.model = new go.GraphLinksModel(nodeDataArray, linkDataArray);
 
     populateNodeDropdowns(graph);
-
 }
 
 export function loadGraph() {

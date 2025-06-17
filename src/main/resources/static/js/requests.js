@@ -79,6 +79,26 @@ export async function makeGet(endpointSuffix) {
     return await response.json();
 }
 
+export async function makeGetPathVar(pathVariable, endpointSuffix) {
+
+    const url = `${base}/${endpointSuffix}/${pathVariable}`;
+
+    const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+        },
+    });
+
+    console.log(response);
+
+    if (!response.ok) {
+        throw new Error(`Error establishing to: ${url}`);
+    }
+
+    return await response.json();
+}
+
 /**
  * Creates an arbitrary PATCH request to any backend endpoint with two request parameters in FormData.
  * @param endpointSuffix The endpoint (suffix) of the API.

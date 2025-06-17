@@ -21,7 +21,7 @@ public class SecurityConfig {
                .headers((headers) -> headers
                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
                )
-               .authorizeHttpRequests(req -> req.requestMatchers("**").permitAll())
+               .authorizeHttpRequests(req -> req.anyRequest().permitAll())
                .build();
     }
 }

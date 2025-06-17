@@ -42,17 +42,17 @@
     </nav>
 
     <div class="toolbar fade-in p-2 d-flex justify-content-between align-items-center mb-1 rounded">
-        <div>
-            <button class="btn btn-sm btn-outline-secondary givefont me-2" id="add-node-btn" data-bs-toggle="modal"
+        <div class="d-flex justify-content-center gap-1 align-self-start align-items-center">
+            <button class="btn btn-sm shadow-sm btn-outline-secondary" id="add-node-btn" data-bs-toggle="modal"
                     data-bs-target="#addNodeModal">
                 <i class="bi bi-node-plus"></i> Add Node
             </button>
 
-            <button class="btn btn-sm btn-outline-danger givefont" id="delete-btn">
+            <button class="btn btn-sm shadow-sm btn-outline-danger" id="delete-btn">
                 <i class="bi bi-trash"></i> Delete Selection
             </button>
 
-            <button class="btn btn-sm btn-outline-secondary givefont me-2" id="explore-nodes-btn" data-bs-toggle="modal"
+            <button class="btn btn-sm shadow-sm btn-outline-secondary" id="explore-nodes-btn" data-bs-toggle="modal"
                     data-bs-target="#exploreNodes">
                 <i class="bi bi-node-plus"></i> Explore graph
             </button>
@@ -61,11 +61,17 @@
                 <i class="bi bi-link-45deg m-1"></i>
 
                 In connect mode - Click a node to connect to |
-                <button class="btn btn-sm ms-1 btn-outline-danger" id="resetConnectingButton">
+                <button class="btn btn-sm ms-1 shadow-sm btn-outline-danger" id="resetConnectingButton">
                     <i class="bi bi-stop" style="color: #8a0000;"></i>
                     Stop Connecting
                 </button>
             </span>
+        </div>
+        <div class="w-25 d-flex align-items-center gap-1 justify-content-center">
+            <input type="text" class="form-control shadow-sm w-75 h-75 border border-1 border-secondary" placeholder="Search Database by Node Name" id="nodeFilter">
+            <button class="btn btn-sm form-btns shadow-sm w-25" id="nodeSearch"><i class="bi bi-search me-1 clickable"></i>Search</button>
+            <button class="btn btn-sm btn-info shadow-sm border border-secondary d-flex justify-content-center align-items-center"
+                    id="resetGraphFilters"><i class="bi bi-text-wrap clickable"></i></button>
         </div>
         <div class="d-flex align-self-end gap-1 justify-content-end">
             <a class="d-flex align-items-center justify-content-center text-waning sidebar-header shadow-sm rounded"

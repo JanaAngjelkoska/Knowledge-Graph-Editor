@@ -9,6 +9,7 @@ import org.neo4j.driver.exceptions.Neo4jException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -54,6 +55,23 @@ public class ArbitraryNodeRepositoryImpl implements ArbitraryNodeRepository {
 
             return result
                     .stream()
+                    .map(record -> NodeSerializer.serialize(record, referencer))
+                    .toList();
+        }
+    }
+
+    @Override
+    public Iterable<NodeDTO> findAllMatchingName(String name) {
+        try (Session session = driver.session(databaseConfig)) {
+            String referencer = "n";
+
+            String queryBuild = String.format(
+                    "MATCH (%s) WHERE toLower(%s.displayName) CONTAINS toLower($name) RETURN %s",
+                    referencer, referencer, referencer);
+
+            Result result = session.run(queryBuild, Collections.singletonMap("name", name));
+
+            return result.stream()
                     .map(record -> NodeSerializer.serialize(record, referencer))
                     .toList();
         }

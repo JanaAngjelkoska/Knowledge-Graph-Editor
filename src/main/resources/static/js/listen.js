@@ -1,13 +1,15 @@
 import * as Requests from "./requests.js";
 import * as GraphConfig from './graphconf.js';
 import {
-    loadGraph,
-    linkGraphToBackend,
+    create_node_msg,
+    create_rel_msg,
+    deleteButton,
     deleteEntity,
-    killConnectingState,
     graph,
+    killConnectingState,
     killConnectionButton,
-    deleteButton, create_node_msg, create_rel_msg
+    linkGraphToBackend,
+    loadGraph
 } from './editor.js';
 
 const cellSizeInput = document.getElementById('cellSize');
@@ -36,6 +38,17 @@ graphTypeLayoutItems.forEach(item => {
             selectedLayout.toLowerCase()
         );
     });
+});
+
+document.getElementById("nodeSearch").addEventListener('click', async () => {
+    GraphConfig.setFilteringNodeStat(true);
+    await linkGraphToBackend(graph);
+});
+
+document.getElementById("resetGraphFilters").addEventListener('click', async () => {
+    GraphConfig.setFilteringNodeStat(false);
+    document.getElementById("nodeFilter").value = "";
+    await linkGraphToBackend(graph);
 });
 
 document.getElementById("createNodeBtn").addEventListener("click", async () => {

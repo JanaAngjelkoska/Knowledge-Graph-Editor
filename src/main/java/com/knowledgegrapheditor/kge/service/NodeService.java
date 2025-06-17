@@ -9,6 +9,8 @@ import java.util.UUID;
 public interface NodeService {
     Iterable<NodeDTO> findAll();
 
+    Iterable<NodeDTO> findAllMatchingName(String name);
+
     Optional<NodeDTO> findById(UUID id);
 
     boolean deleteById(UUID id);

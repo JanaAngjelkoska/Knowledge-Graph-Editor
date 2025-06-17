@@ -4,6 +4,8 @@ const $ = go.GraphObject.make;
 let curCellDim = 20;
 let curLayout = 'graph';
 
+export let filteringNodes = false;
+
 const standardLayout = $(go.ForceDirectedLayout, {
     defaultSpringLength: 100,
     defaultElectricalCharge: 1500,
@@ -311,9 +313,11 @@ export function setLayout(layoutType) {
     loadGraph();
 }
 
-
-
 export function setGridDim(dim) {
     curCellDim = dim;
     loadGraph();
+}
+
+export function setFilteringNodeStat(status) {
+    filteringNodes = status;
 }

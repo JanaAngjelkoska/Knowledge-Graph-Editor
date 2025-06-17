@@ -64,6 +64,11 @@ public class NodeApiController {
         return ResponseEntity.ok(nodeService.findAll());
     }
 
+    @GetMapping("/filtering/{name}")
+    public ResponseEntity<Iterable<NodeDTO>> getAllNodesMatchingName(@PathVariable String name) {
+        return ResponseEntity.ok(nodeService.findAllMatchingName(name));
+    }
+
     @RequestMapping(value = "/delete-property/{id}/{propertyKey}", method = RequestMethod.DELETE)
     public ResponseEntity<Void> deleteProperty(@PathVariable UUID id, @PathVariable String propertyKey) {
         Optional<NodeDTO> result = nodeService.deleteProperty(id, propertyKey);
