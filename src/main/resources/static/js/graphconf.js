@@ -1,15 +1,13 @@
 import {deleteEntity, enableConnectingStatus, labelColorMap, loadGraph, showInfo} from './editor.js';
 
 const $ = go.GraphObject.make;
-
-let snapToGrid = false;
 let curCellDim = 20;
 let curLayout = 'graph';
 
 const standardLayout = $(go.ForceDirectedLayout, {
     defaultSpringLength: 100,
     defaultElectricalCharge: 1500,
-    maxIterations: 200000
+    maxIterations: 1E3
 })
 
 const treeLayout = $(go.LayeredDigraphLayout, {
