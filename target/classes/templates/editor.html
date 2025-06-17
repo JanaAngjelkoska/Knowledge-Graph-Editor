@@ -7,19 +7,19 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="./css/editor.css">
 
-    <link rel="icon" type="image/png" href="/img/favicon.png" sizes="64x64">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 </head>
-<body class="custom-bg-col">
-
+<body>
 <!--main ui-->
 <div class="main-container givefont custom-bg-col container-fluid">
     <nav class="navbar w-100 bg-transparent mx-auto">
         <a class="navbar-brand d-flex align-items-center" href="/">
-            <img src="./img/logo.png" alt="Logo" width="50" height="50" class="d-inline-block align-text-top">
-            <span class="ms-2 givefont">B L O O M</span>
+            <img src="./img/logo.png" alt="Logo" width="50" height="50" class="d-inline-block align-text-top clickable">
+            <span class="ms-2 givefont clickable">B L O O M</span>
         </a>
         <span th:if="${connectionData.connectionStatus()}">
             <i class="bi bi-database-check" style="color: #61be00; font-size: 17px;"></i>
@@ -330,7 +330,7 @@
 </div>
 
 
-<!-- Modal -->
+<!-- exploration modal -->
 <div class="modal fade" id="exploreNodes" tabindex="-1" aria-labelledby="exploreNodesLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -343,24 +343,30 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="dropdown1" class="form-label">Select Node 1:</label>
-                            <select id="dropdown1" class="form-select"></select>
+                            <select id="dropdown1" class="form-select">
+                                <option></option>
+                            </select>
                             <div id="node1-info" class="card mt-3 p-3 bg-light">
                                 <h6>Node Information</h6>
                                 <div class="node-details">
                                     <p class="mb-1"><strong>Labels:</strong> <span id="node1-labels">-</span></p>
-                                    <p class="mb-1"><strong>Properties:</strong> <span id="node1-properties">-</span></p>
+                                    <p class="mb-1"><strong>Properties:</strong> <span id="node1-properties">-</span>
+                                    </p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="col-md-6">
                             <label for="dropdown2" class="form-label">Select Node 2:</label>
-                            <select id="dropdown2" class="form-select"></select>
+                            <select id="dropdown2" class="form-select">
+                                <option></option>
+                            </select>
                             <div id="node2-info" class="card mt-3 p-3 bg-light">
                                 <h6>Node Information</h6>
                                 <div class="node-details">
                                     <p class="mb-1"><strong>Labels:</strong> <span id="node2-labels">-</span></p>
-                                    <p class="mb-1"><strong>Properties:</strong> <span id="node2-properties">-</span></p>
+                                    <p class="mb-1"><strong>Properties:</strong> <span id="node2-properties">-</span>
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -386,80 +392,79 @@
 
 
 <script>
-    function loadNodeDropdown() {
-        fetch('/api/nodes/dropdown')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not OK');
-                }
-                return response.json();
-            })
-            .then(data => {
-                const dropdown1 = document.getElementById('dropdown1');
-                const dropdown2 = document.getElementById('dropdown2');
+    // Fix Bootstrap modal focus blocking Select2
+    $(document).ready(function () {
+        // Disable Bootstrap modal focus enforcement
+        $.fn.modal.Constructor.prototype._enforceFocus = function () {
+        };
 
-                dropdown1.innerHTML = '<option value="">Select a node</option>';
-                dropdown2.innerHTML = '<option value="">Select a node</option>';
+        // Initialize select2 once per dropdown
+        $('#dropdown1').select2({
+            placeholder: 'Search or select Node 1',
+            width: '100%',
+            dropdownParent: $('#exploreNodes') // Important for modal!
+        });
+        $('#dropdown2').select2({
+            placeholder: 'Search or select Node 2',
+            width: '100%',
+            dropdownParent: $('#exploreNodes')
+        });
+
+        // Load nodes when modal is shown
+        $('#exploreNodes').on('shown.bs.modal', function () {
+            loadNodeDropdowns();
+        });
+
+        // Update node info on change
+        $('#dropdown1').on('change', function () {
+            updateNodeInfo(this.value, 'node1');
+        });
+        $('#dropdown2').on('change', function () {
+            updateNodeInfo(this.value, 'node2');
+        });
+    });
+
+    function loadNodeDropdowns() {
+        fetch('/api/nodes/dropdown')
+            .then(res => res.json())
+            .then(data => {
+                const $dropdown1 = $('#dropdown1');
+                const $dropdown2 = $('#dropdown2');
+
+                // Clear old options but keep select2 intact
+                $dropdown1.empty().append('<option></option>');
+                $dropdown2.empty().append('<option></option>');
 
                 data.forEach(item => {
-                    const option1 = document.createElement('option');
-                    option1.value = JSON.stringify(item);
-                    option1.textContent = item.display;
-
-                    const option2 = option1.cloneNode(true);
-
-                    dropdown1.appendChild(option1);
-                    dropdown2.appendChild(option2);
+                    const jsonValue = JSON.stringify(item);
+                    const label = item.display;
+                    $dropdown1.append(`<option value='${jsonValue}'>${label}</option>`);
+                    $dropdown2.append(`<option value='${jsonValue}'>${label}</option>`);
                 });
 
-                dropdown1.addEventListener('change', (e) => {
-                    updateNodeInfo(e.target.value, 'node1');
-                });
-
-                dropdown2.addEventListener('change', (e) => {
-                    updateNodeInfo(e.target.value, 'node2');
-                });
-
-                if ($().select2) {
-                    $('#dropdown1').select2({
-                        placeholder: "Select a node",
-                        width: '100%'
-                    });
-                    $('#dropdown2').select2({
-                        placeholder: "Select a node",
-                        width: '100%'
-                    });
-                }
+                // Trigger Select2 to update options list
+                $dropdown1.trigger('change.select2');
+                $dropdown2.trigger('change.select2');
             })
-            .catch(error => {
-                console.error('Error loading nodes:', error);
-            });
+            .catch(err => console.error('Failed to load nodes:', err));
     }
 
-    function updateNodeInfo(selectedValue, nodePrefix) {
-        if (!selectedValue) {
-            document.getElementById(`${nodePrefix}-labels`).textContent = '-';
-            document.getElementById(`${nodePrefix}-properties`).textContent = '-';
+    function updateNodeInfo(jsonValue, nodeId) {
+        if (!jsonValue) {
+            document.getElementById(`${nodeId}-labels`).textContent = '-';
+            document.getElementById(`${nodeId}-properties`).textContent = '-';
             return;
         }
-
         try {
-            const nodeData = JSON.parse(selectedValue);
-            document.getElementById(`${nodePrefix}-labels`).textContent = nodeData.label || '-';
-
-            const properties = nodeData.display.includes(', ')
-                ? nodeData.display.split(', ')[1]
-                : 'No properties';
-            document.getElementById(`${nodePrefix}-properties`).textContent = properties;
-        } catch (e) {
-            console.error('Error parsing node data:', e);
+            const node = JSON.parse(jsonValue);
+            document.getElementById(`${nodeId}-labels`).textContent = node.label || '-';
+            const props = node.display.split(', ').slice(1).join(', ') || 'No properties.';
+            document.getElementById(`${nodeId}-properties`).textContent = props;
+        } catch (err) {
+            console.error('Failed to parse node info:', err);
         }
     }
 
-    document.getElementById('exploreNodes').addEventListener('shown.bs.modal', loadNodeDropdown);
-
 </script>
-
-
 </body>
 </html>
