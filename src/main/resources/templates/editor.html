@@ -449,7 +449,7 @@
 
             const properties = nodeData.display.includes(', ')
                 ? nodeData.display.split(', ')[1]
-                : 'No properties for the selected node.';
+                : 'No properties.';
             document.getElementById(`${nodePrefix}-properties`).textContent = properties;
         } catch (e) {
             console.error('Error parsing node data:', e);
