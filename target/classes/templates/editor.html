@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> Bloom | Editing Tool </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="./css/editor.css">
+
+    <link rel="icon" type="image/png" href="/img/favicon.png" sizes="64x64">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+</head>
+<body class="custom-bg-col">
+
+<!--main ui-->
+<div class="main-container givefont custom-bg-col container-fluid">
+    <nav class="navbar w-100 bg-transparent mx-auto">
+        <a class="navbar-brand d-flex align-items-center" href="/">
+            <img src="./img/logo.png" alt="Logo" width="50" height="50" class="d-inline-block align-text-top">
+            <span class="ms-2 givefont">B L O O M</span>
+        </a>
+        <span th:if="${connectionData.connectionStatus()}">
+            <i class="bi bi-database-check" style="color: #61be00; font-size: 17px;"></i>
+            Connected to GDB <span th:text="${connectionData.getSessionConfig().database().get()}"
+                                   class="fw-bold"></span>
+        </span>
+        <span class="pulse" th:if="${!connectionData.connectionStatus()}">
+            <a href="/editor" class="me-2 btn text-dark btn-outline-warning btn-sm ms-2">
+                <i class="bi bi-arrow-clockwise"></i> Reload
+            </a>
+            <i class="bi bi-database-exclamation" style="color: #b20000; font-size: 17px;"></i>
+            Please launch the <a href="https://neo4j.com/download/" target="_blank">Neo4j</a> DBMS server, <span
+                class="text-danger" style="font-weight: bolder">failed to connect</span> to GDB
+            <span th:text="${connectionData.getSessionConfig().database().get()}" class="fw-bold"></span>
+        </span>
+
+        <a href="/" class="btn me-2 btn-outline-warning border-warning text-dark py-1 px-3 shadow-sm">
+            <i class="bi bi-arrow-return-left"></i> Back
+        </a>
+    </nav>
+
+    <div class="toolbar fade-in p-2 d-flex justify-content-between align-items-center mb-1 rounded">
+        <div>
+            <button class="btn btn-sm btn-outline-secondary givefont me-2" id="add-node-btn" data-bs-toggle="modal"
+                    data-bs-target="#addNodeModal">
+                <i class="bi bi-node-plus"></i> Add Node
+            </button>
+
+            <button class="btn btn-sm btn-outline-danger givefont" id="delete-btn">
+                <i class="bi bi-trash"></i> Delete Selection
+            </button>
+
+            <button class="btn btn-sm btn-outline-secondary givefont me-2" id="explore-nodes-btn" data-bs-toggle="modal"
+                    data-bs-target="#exploreNodes">
+                <i class="bi bi-node-plus"></i> Explore graph
+            </button>
+
+            <span class="pulse ms-3" id="statusCurrentlyConnectingTo" style="display: none">
+                <i class="bi bi-link-45deg m-1"></i>
+
+                In connect mode - Click a node to connect to |
+                <button class="btn btn-sm ms-1 btn-outline-danger" id="resetConnectingButton">
+                    <i class="bi bi-stop" style="color: #8a0000;"></i>
+                    Stop Connecting
+                </button>
+            </span>
+        </div>
+        <div class="d-flex align-self-end gap-1 justify-content-end">
+            <a class="d-flex align-items-center justify-content-center text-waning sidebar-header shadow-sm rounded"
+               data-bs-toggle="modal"
+               data-bs-target="#settingsModal">
+                <i class="bi bi-gear-wide text-secondary px-2 clickable"></i>
+            </a>
+            <div class="px-2 py-1 rounded shadow-sm sidebar-header">
+                <div class="form-check form-switch">
+                    <input class="form-check-input text-yellow" type="checkbox" id="snapToGridSwitch">
+                    <label class="form-check-label" for="snapToGridSwitch">Snap nodes to grid</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid fade-in py-2 mt-1">
+        <div class="row">
+            <div class="side-bar toolbar rounded h-100 col-2">
+                <div class="sidebar d-flex flex-column py-3 pe-2">
+                    <h3 class="sidebar-header text-center p-2 rounded shadow-sm">
+                        <i class="bi bi-input-cursor-text"></i> Editing menu
+                    </h3>
+
+                    <hr>
+
+                    <div class="d-flex align-items-center justify-content-center     gap-1 ">
+                        <span><i class="bi bi-eye me-1 fs-5"></i></span>
+                        <span class="display-name badge d-flex align-items-center text-bg-dark"
+                              style="font-weight: bolder"></span>
+                        <span class="badge d-flex align-items-center display-class p-1" id="label"
+                              style="font-size: 12px; font-weight: bolder; color: black; border-radius: 5px;"></span>
+                        <span id="relTypeText"
+                              style="font-size: 12px; font-weight: bolder; color: black;"></span>
+                        <span class="display-name-bin"></span>
+                    </div>
+
+                    <hr>
+
+                    <div class="properties d-flex flex-column align-items-center justify-content-center">
+                        <p class="text-center d-flex justify-content-center align-items-center"><i
+                                class="bi fs-5 bi-gear-wide me-1"></i>Properties</p>
+                        <ul class="list-unstyled d-flex flex-column justify-content-center" id="properties-list">
+                        </ul>
+                        <button class="btn btn-sm btn-outline-primary align-self-start givefont save-changes-button">
+                            <i class="bi bi-save2 me-1 clickable"></i>
+                            Save changes
+                        </button>
+
+                        <div class="confirmation-message"></div>
+                        <div class="error-message text-bg-danger"></div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="graphDiv" style="
+                                    border: 1px solid #d6d9dc;" class="fade-in col mx-auto w-100 ms-2 border-1">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- add node modal -->
+<div class="modal fade givefont" id="addNodeModal" tabindex="-1" aria-labelledby="addNodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addNodeModalLabel"><i class="bi bi-node-plus m-1"></i>Node
+                    Creation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="w-100 alert alert-info shadow-sm">
+                    <i class="bi bi-question-circle me-1"></i>
+                    <i class="fs-8">You are currently creating a new node.</i>
+                </div>
+                <div class="mb-3">
+                    <label for="nodeLabels" class="form-label">Label</label>
+                    <input type="text" class="form-control" id="nodeLabels" placeholder="Enter node label">
+                </div>
+
+                <div class="properties">
+                    <p class="label">Properties:</p>
+                    <div class="mb-3">
+                        <label for="propertyKey" class="form-label">
+                            Display Name Key
+                            <i class="bi bi-question-circle text-secondary ms-1"
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="right"
+                               title="You cannot edit this key. This key must be present to dictate what text is shown on the graph consistently.">
+                            </i>
+                        </label>
+                        <input type="text" class="form-control" id="propertyKey"
+                               placeholder="Enter arbitrary property key" value="displayName" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label for="propertyValue" class="form-label">
+                            Display Name Value
+                            <i class="bi bi-question-circle text-secondary ms-1"
+                               data-bs-toggle="tooltip"
+                               data-bs-placement="right"
+                               title="The string you input here will display on the node.">
+                            </i>
+                        </label>
+                        <input type="text" class="form-control" id="propertyValue"
+                               placeholder="Enter property value">
+                    </div>
+
+                    <span>
+                            <i class="bi bi-plus-circle-dotted mx-1 add-property-btn"
+                               style="cursor: url('img/click.png') 0 0, auto; color: dimgray; font-size: 1.3rem;">
+                                <span class="add-new-msg clickable">Add a new property</span>
+                            </i>
+                        </span>
+
+                    <ul class="list-unstyled mt-3" id="propertyList">
+                    </ul>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <div class="confirmation-message-create"></div>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn form-btns" id="createNodeBtn">Create Node</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- add relationship modal -->
+<div class="modal fade givefont" id="addRelationshipModal" tabindex="-1"
+     aria-labelledby="addRelationshipModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addRelationshipModalLabel"><i class="bi bi-link-45deg m-1"></i>Connect
+                    Nodes
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="w-100 alert alert-info shadow-sm">
+                    <i class="bi bi-question-circle me-1"></i>
+                    <i class="fs-8">You are currently connecting 2 nodes.</i>
+                </div>
+                <form id="connect-nodes-form">
+                    <div class="mb-3 clickable">
+                        <label for="node1" class="form-label">Node 1</label>
+                        <select class="form-select" id="node1" required>
+                        </select>
+                    </div>
+                    <div class="mb-3 clickable">
+                        <label for="node2" class="form-label">Node 2</label>
+                        <select class="form-select" id="node2" required>
+                        </select>
+                    </div>
+
+                    <div class="relType">
+                        <div class="mb-3">
+                            <label for="relationshipType" class="form-label clickable">
+                                Relationship Type
+                                <i class="bi bi-question-circle text-secondary ms-1"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="right"
+                                   title="This is the semantic meaning of the connection.
+                                   The string you input here will display on the relationship.">
+                                </i>
+                            </label>
+                            <input type="text" class="form-control clickable" id="relationshipType"
+                                   placeholder="Enter relationship type">
+                        </div>
+                    </div>
+
+                    <div class="propertiesRel">
+                        <ul class="list-unstyled mt-3" id="relationshipPropertyList">
+                        </ul>
+                        <span id="addRelationshipPropertyBtn" class="clickable">
+                            <i class="bi bi-plus-circle-dotted mx-1 add-property-btn"
+                               style="cursor: url('img/click.png') 0 0, auto; color: dimgray; font-size: 1.3rem;">
+                                <span class="add-new-msg clickable ">Add a new property</span>
+                            </i>
+                        </span>
+                    </div>
+                </form>
+
+                <div class="modal-footer">
+                    <div class="confirmation-message-create-rel"></div>
+                    <button type="button" class="btn btn-secondary clickable" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn form-btns clickable" id="createRelationshipBtn">Create Relationship
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- settings modal -->
+<div class="modal fade givefont" id="settingsModal" tabindex="-1"
+     aria-labelledby="settingsModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <h5 class="modal-title" id="settingsModalLabel">
+                    <i class="bi bi-gear-wide me-2"></i>Additional Settings
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="w-100 alert alert-info shadow-sm">
+                    <i class="bi bi-question-circle me-1"></i>
+                    <i class="fs-8">Settings are updated instantly.</i>
+                </div>
+                <div class="d-flex flex-column align-items-center justify-content-center gap-3">
+                    <div class="w-100 mt-2">
+                        <label for="cellSize" class="align-self-start my-1">
+                            <i class="bi bi-grid-3x3 me-1"></i> Grid cell size
+                        </label>
+                        <input id="cellSize" type="number" value="Grid Cell Width (px)" placeholder="123"
+                               class="form-control">
+                    </div>
+
+                    <div class="w-100">
+                        <label for="graphType" class="align-self-start my-1">
+                            <i class="bi bi-layers me-1"></i> Initial layout structure
+                        </label>
+                        <div class="dropdown w-100">
+                            <button class="btn text-left w-100 btn-outline-secondary dropdown-toggle"
+                                    id="graphType" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="align-self-start text-left w-100">
+                                    Select Graph Type
+                                </span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item text-left" href="#" data-value="tree">
+                                        <i class="bi bi-diagram-3 me-1"></i> Tree
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item text-left" href="#" data-value="graph">
+                                        <i class="bi bi-bounding-box-circles me-1"></i> Graph
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary clickable" data-bs-dismiss="modal">Close</button>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="exploreNodes" tabindex="-1" aria-labelledby="exploreNodesLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exploreNodesLabel">Explore Graph Nodes</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="dropdown1" class="form-label">Select Node 1:</label>
+                            <select id="dropdown1" class="form-select"></select>
+                            <div id="node1-info" class="card mt-3 p-3 bg-light">
+                                <h6>Node Information</h6>
+                                <div class="node-details">
+                                    <p class="mb-1"><strong>Labels:</strong> <span id="node1-labels">-</span></p>
+                                    <p class="mb-1"><strong>Properties:</strong> <span id="node1-properties">-</span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="dropdown2" class="form-label">Select Node 2:</label>
+                            <select id="dropdown2" class="form-select"></select>
+                            <div id="node2-info" class="card mt-3 p-3 bg-light">
+                                <h6>Node Information</h6>
+                                <div class="node-details">
+                                    <p class="mb-1"><strong>Labels:</strong> <span id="node2-labels">-</span></p>
+                                    <p class="mb-1"><strong>Properties:</strong> <span id="node2-properties">-</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn form-btns" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary">Save changes</button>
+                <button type="button" class="btn form-btns">Create relationship</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/gojs/release/go.js"></script>
+<script type="module" src="/js/editor.js"></script>
+<script type="module" src="/js/listen.js"></script>
+<script type="module" src="/js/graphconf.js"></script>
+
+
+<script>
+    function loadNodeDropdown() {
+        fetch('/api/nodes/dropdown')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not OK');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const dropdown1 = document.getElementById('dropdown1');
+                const dropdown2 = document.getElementById('dropdown2');
+
+                dropdown1.innerHTML = '<option value="">Select a node</option>';
+                dropdown2.innerHTML = '<option value="">Select a node</option>';
+
+                data.forEach(item => {
+                    const option1 = document.createElement('option');
+                    option1.value = JSON.stringify(item);
+                    option1.textContent = item.display;
+
+                    const option2 = option1.cloneNode(true);
+
+                    dropdown1.appendChild(option1);
+                    dropdown2.appendChild(option2);
+                });
+
+                dropdown1.addEventListener('change', (e) => {
+                    updateNodeInfo(e.target.value, 'node1');
+                });
+
+                dropdown2.addEventListener('change', (e) => {
+                    updateNodeInfo(e.target.value, 'node2');
+                });
+
+                if ($().select2) {
+                    $('#dropdown1').select2({
+                        placeholder: "Select a node",
+                        width: '100%'
+                    });
+                    $('#dropdown2').select2({
+                        placeholder: "Select a node",
+                        width: '100%'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error loading nodes:', error);
+            });
+    }
+
+    function updateNodeInfo(selectedValue, nodePrefix) {
+        if (!selectedValue) {
+            document.getElementById(`${nodePrefix}-labels`).textContent = '-';
+            document.getElementById(`${nodePrefix}-properties`).textContent = '-';
+            return;
+        }
+
+        try {
+            const nodeData = JSON.parse(selectedValue);
+            document.getElementById(`${nodePrefix}-labels`).textContent = nodeData.label || '-';
+
+            const properties = nodeData.display.includes(', ')
+                ? nodeData.display.split(', ')[1]
+                : 'No properties';
+            document.getElementById(`${nodePrefix}-properties`).textContent = properties;
+        } catch (e) {
+            console.error('Error parsing node data:', e);
+        }
+    }
+
+    document.getElementById('exploreNodes').addEventListener('shown.bs.modal', loadNodeDropdown);
+
+</script>
+
+
+</body>
+</html>
