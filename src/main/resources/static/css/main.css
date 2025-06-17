@@ -13,6 +13,11 @@
     font-style: normal;
 }
 
+#modalCreateRelationship{
+    width: 50%;
+    margin-top: 20px;
+}
+
 .confirmation-message{
     margin-top: 10px;
     color: darkgreen;

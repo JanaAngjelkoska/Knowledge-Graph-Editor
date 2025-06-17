@@ -80,11 +80,14 @@ export function graphPropsApply(graph) {
                 relinkableTo: true,
                 contextMenu: contextMenuTemplateLink,
                 reshapable: true,
-                resegmentable: true,
-
+                resegmentable: true
             },
-            $(go.Shape, {strokeWidth: 3, stroke: "#000"}),
-            $(go.Shape, {toArrow: "Standard", stroke: null, fill: "#000"}),
+            new go.Binding("isHighlighted").makeTwoWay(),
+            new go.Binding("stroke", "isHighlighted", h => h ? "red" : "#000").ofObject(),
+
+            $(go.Shape, { strokeWidth: 3 }),  // will be red when highlighted
+            $(go.Shape, { toArrow: "Standard", stroke: null, fill: "#000" }),
+
             $(go.Panel, "Auto",
                 $(go.Shape, "RoundedRectangle", {
                     fill: "#000",
@@ -103,6 +106,7 @@ export function graphPropsApply(graph) {
                 )
             )
         );
+
 
 
     graph.commandHandler.deletesTree = false;

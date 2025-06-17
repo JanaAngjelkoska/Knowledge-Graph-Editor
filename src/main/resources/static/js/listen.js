@@ -133,6 +133,71 @@ document.getElementById("createRelationshipBtn").addEventListener("click", async
 });
 
 
+document.getElementById("createRelationshipFromExpModal").addEventListener("click", async () => {
+    const fromNodeJSON = document.getElementById("dropdown1").value.trim();
+    const toNodeJSON = document.getElementById("dropdown2").value.trim();
+
+    const parsedValueFrom = JSON.parse(fromNodeJSON);
+    const fromNodeId = parsedValueFrom.value;
+
+    const parsedValueTo = JSON.parse(toNodeJSON);
+    const toNodeId = parsedValueTo.value;
+
+    const relationshipType = document.getElementById("modalCreateRelationship").value.trim();
+
+    const properties = {}
+
+    if (fromNodeId && toNodeId && relationshipType && Object.keys(properties).length >= 0) {
+        try {
+            const postData = {
+                startNodeId: fromNodeId,
+                endNodeId: toNodeId,
+                relationshipType: relationshipType.toString().trim(),
+                properties: properties
+            };
+
+            await Requests.makePostJsonBody(postData, `api/relationships/create/${fromNodeId}/${toNodeId}`);
+
+            create_rel_msg.innerHTML = `
+                <i class="bi bi-check-circle"></i>
+                <span class="me-1">Relationship Created.</span>
+            `;
+
+            // Reload the graph first
+            await linkGraphToBackend(graph);
+
+            // Give GoJS time to rebuild before trying to access the diagram
+            setTimeout(() => {
+                const diagram = graph; // your GoJS Diagram object
+
+                // Try both directions just in case
+                const link =
+                    diagram.findLinkForData({ from: fromNodeId, to: toNodeId }) ||
+                    diagram.findLinkForData({ from: toNodeId, to: fromNodeId });
+
+                if (link) {
+                    const centerPoint = link.actualBounds.center;
+                    diagram.centerRect(new go.Rect(centerPoint, new go.Size(1, 1)));
+
+                    // Optional: visually highlight the link briefly
+                    link.isHighlighted = true;
+                    setTimeout(() => link.isHighlighted = false, 5000);
+                } else {
+                    console.warn("Newly created link not found in the diagram.");
+                }
+            }, 300); // Wait just enough for the diagram to fully load
+
+        } catch (error) {
+            console.error('Error during relationship creation:', error);
+        }
+    } else {
+        alert("Please fill in all fields and at least one property.");
+    }
+
+    killConnectingState();
+});
+
+
 document.querySelector("#resetConnectingButton").addEventListener('click', killConnectingState);
 
 document.querySelector("#snapToGridSwitch").addEventListener('change', async (event) => {
