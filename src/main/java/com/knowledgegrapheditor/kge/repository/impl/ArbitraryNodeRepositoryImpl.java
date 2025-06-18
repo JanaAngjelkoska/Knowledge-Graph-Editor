@@ -65,17 +65,30 @@ public class ArbitraryNodeRepositoryImpl implements ArbitraryNodeRepository {
         try (Session session = driver.session(databaseConfig)) {
             String referencer = "n";
 
-            String queryBuild = String.format(
-                    "MATCH (%s) WHERE toLower(%s.displayName) CONTAINS toLower($name) RETURN %s",
-                    referencer, referencer, referencer);
+            String query = String.format(
+                    """
+                    MATCH (%1$s)
+                    WHERE toLower(%1$s.displayName) CONTAINS toLower($name)
+                    WITH COLLECT(DISTINCT %1$s) AS matched
+                    UNWIND matched AS %1$s
+                    MATCH (%1$s)-[]-(m)
+                    WHERE NOT m IN matched
+                    WITH matched, COLLECT(DISTINCT m) AS connected
+                    WITH matched + connected AS allNodes
+                    UNWIND allNodes AS %1$s
+                    RETURN DISTINCT %1$s
+                    """, referencer
+            );
 
-            Result result = session.run(queryBuild, Collections.singletonMap("name", name));
+            Result result = session.run(query, Collections.singletonMap("name", name));
 
             return result.stream()
                     .map(record -> NodeSerializer.serialize(record, referencer))
                     .toList();
         }
     }
+
+
 
     @Override
     public boolean deleteById(UUID id) {
