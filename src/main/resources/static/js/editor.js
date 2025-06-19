@@ -52,9 +52,18 @@ export async function linkGraphToBackend(graph) {
             nodes = await Requests.makeGetPathVar(name, 'api/nodes/filtering');
         }
         GraphConfig.setFilteringNodeStat(false);
+    } else if (GraphConfig.filteringRels) {
+        const name = document.querySelector('#relFilter').value;
+        if (name === null || name.toString().trim() === "") {
+            nodes = await Requests.makeGet("api/nodes");
+        } else {
+            nodes = await Requests.makeGetPathVar(name, 'api/nodes/filteringByRel');
+        }
+        GraphConfig.setFilteringRelStat(false);
     } else {
         nodes = await Requests.makeGet("api/nodes");
     }
+
     const edges = await Requests.makeGet("api/relationships");
 
     const nodeDataArray = nodes.map(node => ({

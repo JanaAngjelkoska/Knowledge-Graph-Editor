@@ -1,5 +1,6 @@
 package com.knowledgegrapheditor.kge.repository;
 
+import com.knowledgegrapheditor.kge.model.NodeDTO;
 import com.knowledgegrapheditor.kge.model.RelationshipDTO;
 
 import java.util.Map;

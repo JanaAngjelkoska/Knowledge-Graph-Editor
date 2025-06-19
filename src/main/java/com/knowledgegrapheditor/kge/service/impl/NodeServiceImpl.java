@@ -29,6 +29,11 @@ public class NodeServiceImpl implements NodeService {
     }
 
     @Override
+    public Iterable<NodeDTO> findAllParticipatingInRelWithName(String name) {
+        return nodeRepository.findAllParticipatingInRelWithName(name);
+    }
+
+    @Override
     public Optional<NodeDTO> findById(UUID id) {
         return nodeRepository.findById(id);
     }

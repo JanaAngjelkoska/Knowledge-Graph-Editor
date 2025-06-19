@@ -5,6 +5,7 @@ let curCellDim = 20;
 let curLayout = 'graph';
 
 export let filteringNodes = false;
+export let filteringRels = false;
 
 const standardLayout = $(go.ForceDirectedLayout, {
     defaultSpringLength: 100,
@@ -324,4 +325,8 @@ export function setGridDim(dim) {
 
 export function setFilteringNodeStat(status) {
     filteringNodes = status;
+}
+
+export function setFilteringRelStat(status) {
+    filteringRels = status;
 }

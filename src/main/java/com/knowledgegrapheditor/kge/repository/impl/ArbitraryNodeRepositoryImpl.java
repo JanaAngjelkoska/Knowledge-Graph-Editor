@@ -88,7 +88,28 @@ public class ArbitraryNodeRepositoryImpl implements ArbitraryNodeRepository {
         }
     }
 
+    @Override
+    public Iterable<NodeDTO> findAllParticipatingInRelWithName(String name) {
+        try (Session session = driver.session(databaseConfig)) {
+            String referencer = "n";
 
+            String query = String.format(
+                    """
+                    MATCH (a)-[r]-(b)
+                    WHERE toLower(type(r)) CONTAINS toLower($name)
+                    WITH COLLECT(DISTINCT a) + COLLECT(DISTINCT b) AS allNodes
+                    UNWIND allNodes AS %1$s
+                    RETURN DISTINCT %1$s
+                    """, referencer
+            );
+
+            Result result = session.run(query, Collections.singletonMap("name", name));
+
+            return result.stream()
+                    .map(record -> NodeSerializer.serialize(record, referencer))
+                    .toList();
+        }
+    }
 
     @Override
     public boolean deleteById(UUID id) {

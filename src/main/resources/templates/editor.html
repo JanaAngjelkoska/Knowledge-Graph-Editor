@@ -21,6 +21,7 @@
             <img src="./img/logo.png" alt="Logo" width="50" height="50" class="d-inline-block align-text-top clickable">
             <span class="ms-2 givefont clickable">B L O O M</span>
         </a>
+
         <span th:if="${connectionData.connectionStatus()}">
             <i class="bi bi-database-check" style="color: #61be00; font-size: 17px;"></i>
             Connected to GDB <span th:text="${connectionData.getSessionConfig().database().get()}"
@@ -41,20 +42,51 @@
         </a>
     </nav>
 
+    <span class="givefont fade-in-slower m-0 p-1 text-secondary"><i class="bi bi-wrench-adjustable-circle me-1 text-secondary"></i>Tools</span>
     <div class="toolbar fade-in p-2 d-flex justify-content-between align-items-center mb-1 rounded">
         <div class="d-flex justify-content-center gap-1 align-self-start align-items-center">
-            <button class="btn btn-sm shadow-sm btn-outline-secondary" id="add-node-btn" data-bs-toggle="modal"
+            <button class="btn btn-sm shadow-sm btn-outline-dark" id="add-node-btn" data-bs-toggle="modal"
                     data-bs-target="#addNodeModal">
                 <i class="bi bi-node-plus"></i> Add Node
             </button>
 
-            <button class="btn btn-sm shadow-sm btn-outline-danger" id="delete-btn">
-                <i class="bi bi-trash"></i> Delete Selection
+            <button class="btn btn-sm shadow-sm btn-outline-dark" id="explore-nodes-btn" data-bs-toggle="modal"
+                    data-bs-target="#exploreNodes">
+                <i class="bi bi-bounding-box"></i> Explore graph
             </button>
 
-            <button class="btn btn-sm shadow-sm btn-outline-secondary" id="explore-nodes-btn" data-bs-toggle="modal"
-                    data-bs-target="#exploreNodes">
-                <i class="bi bi-node-plus"></i> Explore graph
+            <div id="searchWrapper" class="position-relative">
+                <button id="searchToggle" type="button" class="btn btn-outline-dark btn-sm shadow-sm">
+                    <i class="bi bi-stars"></i> Quick Find
+                </button>
+
+                <div id="searchForm"
+                      class="search-float position-absolute bg-light border rounded shadow p-3"
+                      style="bottom: calc(100% + 3px); left: 0; z-index: 9999; min-width: 500px;">
+                    <div class="d-flex align-items-center gap-1 mb-1 justify-content-center">
+                        <input type="text" class="form-control shadow-sm w-75 h-75 border border-1 border-secondary"
+                               placeholder="Search Database by Node Name" id="nodeFilter">
+                        <button class="btn btn-sm form-btns shadow-sm w-25" id="nodeSearch">
+                            <i class="bi bi-search me-1 clickable"> </i>Search
+                        </button>
+                        <button class="btn btn-sm btn-info shadow-sm border border-secondary d-flex justify-content-center align-items-center"
+                                id="resetNodeFilters"><i class="bi bi-text-wrap clickable"></i></button>
+                    </div>
+                    <div class="d-flex align-items-center gap-1 justify-content-center">
+                        <input type="text" class="form-control shadow-sm w-75 h-75 border border-1 border-secondary"
+                               placeholder="Search Database by Link Name" id="relFilter">
+                        <button class="btn btn-sm form-btns shadow-sm w-25" id="relSearch"><i
+                                class="bi bi-search me-1 clickable"> </i>Search
+                        </button>
+                        <button class="btn btn-sm btn-info shadow-sm border border-secondary d-flex justify-content-center align-items-center"
+                                id="resetRelationshipFilters"><i class="bi bi-text-wrap clickable"></i></button>
+                    </div>
+                </div>
+            </div>
+
+
+            <button class="btn btn-sm shadow-sm btn-outline-danger" id="delete-btn">
+                <i class="bi bi-trash"></i> Delete Selection
             </button>
 
             <span class="pulse ms-3" id="statusCurrentlyConnectingTo" style="display: none">
@@ -66,12 +98,6 @@
                     Stop Connecting
                 </button>
             </span>
-        </div>
-        <div class="w-25 d-flex align-items-center gap-1 justify-content-center">
-            <input type="text" class="form-control shadow-sm w-75 h-75 border border-1 border-secondary" placeholder="Search Database by Node Name" id="nodeFilter">
-            <button class="btn btn-sm form-btns shadow-sm w-25" id="nodeSearch"><i class="bi bi-search me-1 clickable"></i>Search</button>
-            <button class="btn btn-sm btn-info shadow-sm border border-secondary d-flex justify-content-center align-items-center"
-                    id="resetGraphFilters"><i class="bi bi-text-wrap clickable"></i></button>
         </div>
         <div class="d-flex align-self-end gap-1 justify-content-end">
             <a class="d-flex align-items-center justify-content-center text-waning sidebar-header shadow-sm rounded"
@@ -129,7 +155,8 @@
             </div>
 
             <div id="graphDiv" style="
-                                    border: 1px solid #d6d9dc;" class="fade-in col mx-auto w-100 ms-2 border-1">
+                                    border: 1px solid #d6d9dc; z-index: 1000;"
+                 class="fade-in col mx-auto w-100 ms-2 border-1">
             </div>
         </div>
     </div>
@@ -304,20 +331,20 @@
                             <i class="bi bi-layers me-1"></i> Initial layout structure
                         </label>
                         <div class="dropdown w-100">
-                            <button class="btn text-left w-100 btn-outline-secondary dropdown-toggle"
+                            <button class="btn text-left w-100 btn-outline-secondary dropdown-toggle clickable"
                                     id="graphType" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <span class="align-self-start text-left w-100">
+                                <span class="align-self-start text-left w-100 clickable">
                                     Select Graph Type
                                 </span>
                             </button>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a class="dropdown-item text-left" href="#" data-value="tree">
+                                    <a class="dropdown-item text-left clickable" href="#" data-value="tree">
                                         <i class="bi bi-diagram-3 me-1"></i> Tree
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item text-left" href="#" data-value="graph">
+                                    <a class="dropdown-item text-left clickable" href="#" data-value="graph">
                                         <i class="bi bi-bounding-box-circles me-1"></i> Graph
                                     </a>
                                 </li>
@@ -379,11 +406,13 @@
                     </div>
                 </div>
 
-                <input type="text" class="form-control" id="modalCreateRelationship" placeholder="Enter the relationship name" required>
+                <input type="text" class="form-control" id="modalCreateRelationship"
+                       placeholder="Enter the relationship name" required>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn form-btns" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn form-btns" id="createRelationshipFromExpModal">Create relationship</button>
+                <button type="button" class="btn form-btns" id="createRelationshipFromExpModal">Create relationship
+                </button>
             </div>
         </div>
     </div>
@@ -471,6 +500,19 @@
             console.error('Failed to parse node info:', err);
         }
     }
+
+    const toggleBtn = document.getElementById('searchToggle');
+    const searchForm = document.getElementById('searchForm');
+
+    toggleBtn.addEventListener('click', () => {
+        searchForm.classList.toggle('show');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!document.getElementById('searchWrapper').contains(e.target)) {
+            searchForm.classList.remove('show');
+        }
+    });
 
 </script>
 </body>

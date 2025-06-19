@@ -112,4 +112,16 @@ html, body {
 body {
     cursor: url('/img/cursor.png') 0 0, auto;
 }
-/* ============ radial menu pop-up ============== */
+
+.search-float {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+}
+
+.search-float.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}

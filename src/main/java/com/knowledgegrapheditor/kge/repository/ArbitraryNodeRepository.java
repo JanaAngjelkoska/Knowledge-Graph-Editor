@@ -11,6 +11,8 @@ public interface ArbitraryNodeRepository {
 
     Iterable<NodeDTO> findAllMatchingName(String name);
 
+    Iterable<NodeDTO> findAllParticipatingInRelWithName(String name);
+
     Optional<NodeDTO> findById(UUID id);
 
     boolean deleteById(UUID id);

@@ -45,9 +45,20 @@ document.getElementById("nodeSearch").addEventListener('click', async () => {
     await linkGraphToBackend(graph);
 });
 
-document.getElementById("resetGraphFilters").addEventListener('click', async () => {
+document.getElementById("relSearch").addEventListener('click', async () => {
+    GraphConfig.setFilteringRelStat(true);
+    await linkGraphToBackend(graph);
+});
+
+document.getElementById("resetNodeFilters").addEventListener('click', async () => {
     GraphConfig.setFilteringNodeStat(false);
     document.getElementById("nodeFilter").value = "";
+    await linkGraphToBackend(graph);
+});
+
+document.getElementById("resetRelationshipFilters").addEventListener('click', async () => {
+    GraphConfig.setFilteringRelStat(false);
+    document.getElementById("relFilter").value = "";
     await linkGraphToBackend(graph);
 });
 
