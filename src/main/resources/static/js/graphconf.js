@@ -50,6 +50,7 @@ export function graphPropsApply(graph) {
             },
             $(go.Shape, "Circle",
                 {
+                    name: "SHAPE",       // <--- Add this name
                     strokeWidth: 2,
                     width: 90,
                     height: 90
@@ -62,7 +63,6 @@ export function graphPropsApply(graph) {
                     textAlign: "center",
                     stroke: "black",
                     wrap: go.TextBlock.WrapFit,
-
                     maxSize: new go.Size(60, NaN),
                     overflow: go.TextBlock.OverflowClip,
                     verticalAlignment: go.Spot.Center
@@ -70,6 +70,7 @@ export function graphPropsApply(graph) {
                 new go.Binding("text", "text")
             )
         );
+
 
     graph.linkTemplate =
         $(go.Link,
@@ -83,6 +84,7 @@ export function graphPropsApply(graph) {
                 reshapable: true,
                 resegmentable: true
             },
+
             new go.Binding("isHighlighted").makeTwoWay(),
             new go.Binding("stroke", "isHighlighted", h => h ? "red" : "#000").ofObject(),
 

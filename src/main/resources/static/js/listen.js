@@ -177,26 +177,59 @@ document.getElementById("createRelationshipFromExpModal").addEventListener("clic
             // Reload the graph first
             await linkGraphToBackend(graph);
 
-            // Give GoJS time to rebuild before trying to access the diagram
             setTimeout(() => {
-                const diagram = graph; // your GoJS Diagram object
+                const diagram = graph;
 
-                // Try both directions just in case
-                const link =
-                    diagram.findLinkForData({ from: fromNodeId, to: toNodeId }) ||
-                    diagram.findLinkForData({ from: toNodeId, to: fromNodeId });
+                // Find both nodes
+                const fromNode = diagram.findNodeForKey(fromNodeId);
+                const toNode = diagram.findNodeForKey(toNodeId);
 
-                if (link) {
-                    const centerPoint = link.actualBounds.center;
-                    diagram.centerRect(new go.Rect(centerPoint, new go.Size(1, 1)));
+                if (fromNode && toNode) {
+                    // Zoom out to show both nodes with padding
+                    const padding = 150;
+                    const bounds = fromNode.actualBounds.union(toNode.actualBounds);
+                    bounds.inflate(padding, padding);
+                    diagram.commandHandler.zoomToFit(bounds);
 
-                    // Optional: visually highlight the link briefly
-                    link.isHighlighted = true;
-                    setTimeout(() => link.isHighlighted = false, 5000);
-                } else {
-                    console.warn("Newly created link not found in the diagram.");
+                    // Temporarily override the color bindings
+                    diagram.startTransaction("highlight");
+
+                    // Get the shape objects
+                    const fromShape = fromNode.findObject("SHAPE");
+                    const toShape = toNode.findObject("SHAPE");
+
+                    // Store original values
+                    const originalFromFill = fromShape.fill;
+                    const originalToFill = toShape.fill;
+                    const originalFromStroke = fromShape.stroke;
+                    const originalToStroke = toShape.stroke;
+                    const originalFromStrokeWidth = fromShape.strokeWidth;
+                    const originalToStrokeWidth = toShape.strokeWidth;
+
+                    // Apply burgundy highlight
+                    fromShape.fill = "rgba(128,0,32,0.59)";
+                    fromShape.stroke = "rgba(128,0,32,0.59)";
+                    fromShape.strokeWidth = 3;
+
+                    toShape.fill = "rgba(128,0,32,0.59)";
+                    toShape.stroke = "rgba(128,0,32,0.59)";
+                    toShape.strokeWidth = 3;
+
+                    diagram.commitTransaction("highlight");
+
+                    // Reset after delay
+                    setTimeout(() => {
+                        diagram.startTransaction("reset");
+                        fromShape.fill = originalFromFill;
+                        toShape.fill = originalToFill;
+                        fromShape.stroke = originalFromStroke;
+                        toShape.stroke = originalToStroke;
+                        fromShape.strokeWidth = originalFromStrokeWidth;
+                        toShape.strokeWidth = originalToStrokeWidth;
+                        diagram.commitTransaction("reset");
+                    }, 10000);
                 }
-            }, 300); // Wait just enough for the diagram to fully load
+            }, 500);
 
         } catch (error) {
             console.error('Error during relationship creation:', error);
